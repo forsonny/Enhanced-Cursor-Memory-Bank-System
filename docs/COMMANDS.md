@@ -1,556 +1,313 @@
-# Memory Structure Documentation
+# Command Reference
 
-This document explains the memory file structure used by the Enhanced Memory Bank System, including the purpose and content of each file.
+This document provides a complete reference for all commands available in the Enhanced Memory Bank System.
 
-## Directory Structure
+## Command Syntax
 
-The Enhanced Memory Bank System organizes memory in a hierarchical structure:
+All commands follow this general syntax:
 
 ```
-.cursor/memory/
-├── config.json               # System configuration
-├── short_term/               # Session-specific memory
-│   ├── current_context.md    # Active development focus
-│   ├── working_decisions.md  # Temporary decisions
-│   └── session_notes.md      # Current session notes
-└── long_term/                # Persistent memory
-    ├── project_brief.md      # Core project definition
-    ├── architecture.md       # System architecture
-    ├── patterns.md           # Established patterns
-    ├── decisions.md          # Important project decisions
-    └── progress.md           # Development progress
+/<command_group> <command> [arguments] [options]
 ```
 
-## Configuration File
+Command groups include:
+- `memory` - Core memory operations
+- `mode` - Mode confirmation operations
+- `think` - THINK mode operations
+- `plan` - PLAN mode operations
+- `implement` - IMPLEMENT mode operations
+- `review` - REVIEW mode operations
+- `document` - DOCUMENT mode operations
+- `context` - Context management operations
+- `events` - Event system operations
 
-`.cursor/memory/config.json` controls the behavior of the memory system:
+## Memory Commands
 
-```json
-{
-  "system": {
-    "version": "1.0.0",
-    "initialized": true,
-    "current_mode": "THINK",
-    "complexity_level": 2,
-    "last_updated": "",
-    "memory_root": ".cursor/memory"
-  },
-  "short_term": {
-    "enabled": true,
-    "retention": "7d",
-    "auto_cleanup": true,
-    "files": { ... }
-  },
-  "long_term": {
-    "enabled": true,
-    "auto_promote": true,
-    "files": { ... }
-  },
-  "auto_context": { ... },
-  "events": { ... },
-  "commands": { ... },
-  "modes": { ... }
+### Core Memory Commands
+
+| Command | Arguments | Description | Example |
+|---------|-----------|-------------|---------|
+| `/memory init` | None | Initialize the memory system | `/memory init` |
+| `/memory status` | None | Display current memory system status | `/memory status` |
+| `/memory help` | None | Show available memory commands and usage | `/memory help` |
+
+### Memory Management Commands
+
+| Command | Arguments | Options | Description | Example |
+|---------|-----------|---------|-------------|---------|
+| `/memory save` | `<context>` | `-t` (temporary)<br>`-m <message>` (message) | Save current information to specified memory context | `/memory save architecture`<br>`/memory save patterns -t`<br>`/memory save decisions -m "Auth decision"` |
+| `/memory recall` | `<context>` | `-v` (verbose) | Retrieve information from specified memory context | `/memory recall patterns`<br>`/memory recall architecture -v` |
+| `/memory update` | `<file> <content>` | None | Update specific memory file | `/memory update decisions.md "Decision: We will use TypeScript"` |
+| `/memory search` | `<query>` | `-c <context>` (context) | Search across memory for relevant information | `/memory search authentication`<br>`/memory search -c architecture database` |
+
+### Memory Organization Commands
+
+| Command | Arguments | Options | Description | Example |
+|---------|-----------|---------|-------------|---------|
+| `/memory promote` | `<source>` | `-d <destination>` (destination) | Promote short-term memory to long-term | `/memory promote working_decisions.md`<br>`/memory promote working_decisions.md -d decisions.md` |
+| `/memory archive` | `<file>` | None | Archive memory that's no longer actively relevant | `/memory archive old_patterns.md` |
+| `/memory consolidate` | `<files> <target>` | None | Combine related memories into a cohesive document | `/memory consolidate auth_*.md authentication.md` |
+
+### Configuration Commands
+
+| Command | Arguments | Description | Example |
+|---------|-----------|-------------|---------|
+| `/memory config` | `<key> <value>` | Update memory system configuration | `/memory config short_term.retention 7d`<br>`/memory config auto_context.max_files 10` |
+| `/memory toggle` | `<feature>` | Enable/disable specific memory features | `/memory toggle auto_recall`<br>`/memory toggle events.fileCreation` |
+
+### Command Shortcuts
+
+| Shortcut | Full Command | Description | Example |
+|----------|--------------|-------------|---------|
+| `/ms` | `/memory status` | Check memory system status | `/ms` |
+| `/mr` | `/memory recall` | Recall memory context | `/mr patterns` |
+| `/mu` | `/memory update` | Update memory file | `/mu decisions.md "New decision"` |
+
+## Mode Commands
+
+### Mode Confirmation
+
+| Command | Arguments | Description | Example |
+|---------|-----------|-------------|---------|
+| `/mode` | `<mode_name>` | Confirm current operational mode (after UI selection) | `/mode think`<br>`/mode plan`<br>`/mode implement`<br>`/mode review`<br>`/mode document` |
+
+### THINK Mode Commands
+
+| Command | Arguments | Description | Example |
+|---------|-----------|-------------|---------|
+| `/think explore` | `<topic>` | Start guided exploration of a topic | `/think explore authentication` |
+| `/think compare` | `<options>` | Analyze trade-offs between approaches | `/think compare "JWT vs session auth"` |
+| `/think research` | `<query>` | Research and document findings on a topic | `/think research "modern auth best practices"` |
+
+### PLAN Mode Commands
+
+| Command | Arguments | Description | Example |
+|---------|-----------|-------------|---------|
+| `/plan create` | `<feature>` | Create plan for implementing feature | `/plan create user-authentication` |
+| `/plan validate` | None | Check plan against system architecture | `/plan validate` |
+| `/plan estimate` | None | Estimate effort for current plan | `/plan estimate` |
+| `/plan approve` | None | Mark plan as approved and ready for implementation | `/plan approve` |
+
+### IMPLEMENT Mode Commands
+
+| Command | Arguments | Description | Example |
+|---------|-----------|-------------|---------|
+| `/implement start` | `<task>` | Begin implementation of specific task | `/implement start user-authentication` |
+| `/implement checkpoint` | None | Record progress checkpoint | `/implement checkpoint` |
+| `/implement complete` | None | Mark current task as complete | `/implement complete` |
+| `/implement issue` | `<description>` | Record implementation issue | `/implement issue "Edge case in login flow"` |
+
+### REVIEW Mode Commands
+
+| Command | Arguments | Description | Example |
+|---------|-----------|-------------|---------|
+| `/review code` | `<file>` | Review specific file | `/review code src/auth/login.ts` |
+| `/review feature` | `<feature>` | Review entire feature | `/review feature authentication` |
+| `/review suggest` | None | Generate improvement suggestions | `/review suggest` |
+| `/review approve` | None | Mark current implementation as reviewed and approved | `/review approve` |
+
+### DOCUMENT Mode Commands
+
+| Command | Arguments | Description | Example |
+|---------|-----------|-------------|---------|
+| `/document update` | `<file>` | Update specific documentation | `/document update api-docs` |
+| `/document generate` | `<type>` | Generate documentation from code | `/document generate api` |
+| `/document promote` | `<temp_file>` | Promote temporary documentation to permanent | `/document promote session_notes.md` |
+| `/document validate` | None | Check documentation for consistency | `/document validate` |
+
+## Context Commands
+
+| Command | Arguments | Description | Example |
+|---------|-----------|-------------|---------|
+| `/context load` | `<memory_file>` | Explicitly load specific memory file | `/context load patterns.md` |
+| `/context unload` | `<memory_file>` | Remove specific memory file from context | `/context unload architecture.md` |
+| `/context refresh` | None | Reload all context based on current state | `/context refresh` |
+| `/context status` | None | Show currently loaded memory files | `/context status` |
+| `/context suggest` | None | Get suggestions for additional relevant context | `/context suggest` |
+
+## Event Commands
+
+| Command | Arguments | Description | Example |
+|---------|-----------|-------------|---------|
+| `/events status` | None | Check event system status | `/events status` |
+| `/events enable` | `<type>` | Enable specific event type | `/events enable fileCreation` |
+| `/events disable` | `<type>` | Disable specific event type | `/events disable buildEvents` |
+| `/events trigger` | `<type>` | Manually trigger event processing | `/events trigger gitOperations` |
+| `/events config` | `<key> <value>` | Configure event system | `/events config notification_level verbose` |
+
+## Command Help System
+
+All commands provide contextual help with the `-h` flag:
+
+```
+/memory save -h
+
+COMMAND: /memory save <context>
+DESCRIPTION: Saves current information to specified memory context
+ARGUMENTS:
+  <context> - Target memory context (required)
+OPTIONS:
+  -t - Store as temporary (short-term) memory
+  -m <message> - Add descriptive message
+EXAMPLES:
+  /memory save architecture
+  /memory save patterns -t
+  /memory save decisions -m "Updated authentication approach"
+```
+
+## Command Response Format
+
+When a memory command is executed, the response follows this format:
+
+```
+MEMORY COMMAND: <command>
+STATUS: <success|failure>
+DETAILS: <relevant details about operation>
+NEXT STEPS: <suggested follow-up actions>
+```
+
+## Command Chaining
+
+Commands can be chained using the `&&` operator:
+
+```
+/memory recall architecture && /memory update architecture.md "Updated architecture"
+```
+
+## Command Permissions
+
+All memory commands are available in any operational mode, but some have mode-specific behaviors:
+
+- Save operations in Review mode include review metadata
+- Update operations in Implement mode include implementation details
+- Consolidate operations in Think mode include decision reasoning
+
+## Annotation Commands
+
+These aren't typed as commands, but are used in code comments to trigger memory updates:
+
+| Annotation | Purpose | Example |
+|------------|---------|---------|
+| `// @memory:note` | Add note to session_notes.md | `// @memory:note This approach handles edge cases better` |
+| `// @memory:decision` | Add to decisions.md | `// @memory:decision We're using JWT for authentication` |
+| `// @memory:pattern` | Add to patterns.md | `// @memory:pattern This pattern for API routing should be followed` |
+| `// @memory:architecture` | Add to architecture.md | `// @memory:architecture This service handles payment processing` |
+| `// @memory:todo` | Add to current_context.md | `// @memory:todo Refactor this component to use the new pattern` |
+| `// @memory:progress` | Update progress.md | `// @memory:progress Completed user authentication flow` |
+
+## Examples
+
+### Basic Workflow Examples
+
+Setting up a new project:
+```
+/memory init
+/memory update long_term/project_brief.md "Project description..."
+/memory status
+```
+
+Starting a new feature in THINK mode:
+```
+# First, select THINK in UI dropdown
+/mode think
+/think explore "user authentication"
+/memory save working_decisions.md
+```
+
+Moving to planning:
+```
+# First, select PLAN in UI dropdown
+/mode plan
+/plan create "user authentication"
+/memory update current_context.md "Planning user authentication..."
+/plan approve
+```
+
+Starting implementation:
+```
+# First, select IMPLEMENT in UI dropdown
+/mode implement
+/implement start "user authentication"
+/memory update progress.md "Started implementing user authentication..."
+/implement checkpoint
+```
+
+Reviewing implementation:
+```
+# First, select REVIEW in UI dropdown
+/mode review
+/review code "src/auth/login.ts"
+/memory save session_notes.md
+/review approve
+```
+
+Documenting completed work:
+```
+# First, select DOCUMENT in UI dropdown
+/mode document
+/document update api-docs
+/memory promote working_decisions.md
+/document validate
+```
+
+### Advanced Examples
+
+Complex search:
+```
+/memory search -c architecture,patterns "authentication flow"
+```
+
+Consolidating related memories:
+```
+/memory consolidate "auth_flow.md,auth_api.md,auth_security.md" "authentication.md"
+```
+
+Configuring event notifications:
+```
+/memory config events.notification_level verbose
+/events enable gitOperations
+/events disable fileModification
+```
+
+Using annotations in code:
+```javascript
+// @memory:pattern This factory pattern should be used for all service initialization
+function createAuthService(config) {
+  // Implementation
+}
+
+// @memory:decision We're using JWT with asymmetric keys for auth
+const authType = 'jwt-asymmetric';
+
+// @memory:todo Need to implement refresh token flow
+function handleLogin() {
+  // Current implementation
 }
 ```
 
-Key configuration sections:
-- `system`: Core system parameters
-- `short_term`: Short-term memory configuration
-- `long_term`: Long-term memory configuration
-- `auto_context`: Automatic context loading settings
-- `events`: Event-triggered update configuration
-- `commands`: Command interface settings
-- `modes`: Operational mode settings
-
-## Short-Term Memory Files
-
-Short-term memory files store information that's primarily relevant to the current development session.
-
-### current_context.md
-
-**Purpose**: Tracks what you're currently working on
-
-**Structure**:
-```markdown
-# Current Context
-
-## Active Task
-[Task description]
-
-## Background
-[Relevant background information]
-
-## Current Focus
-[What I'm working on right now]
-
-## Next Steps
-1. [Step 1]
-2. [Step 2]
-3. [Step 3]
-
-## Open Questions
-- [Question 1]
-- [Question 2]
-
-## Recent Changes
-- [Change 1] - [Timestamp]
-- [Change 2] - [Timestamp]
-
-## Mode: [CURRENT_MODE]
-
-Last Updated: [TIMESTAMP]
-```
-
-**Usage**: Updated whenever your focus changes or when switching between tasks
-
-### working_decisions.md
-
-**Purpose**: Documents decisions being considered but not yet finalized
-
-**Structure**:
-```markdown
-# Working Decisions
-
-## Under Consideration
-
-### [Decision Topic 1]
-
-**Options:**
-- Option A: [Description]
-  - Pros: [List pros]
-  - Cons: [List cons]
-- Option B: [Description]
-  - Pros: [List pros]
-  - Cons: [List cons]
-
-**Current Thinking:** [Preliminary decision direction]
-
-## Recently Decided
-
-### [Decision 1]
-
-**Decision:** [What was decided]
-**Rationale:** [Why this decision was made]
-**Date:** [When decided]
-**Status:** [Implemented/Pending Implementation]
-```
-
-**Usage**: Updated during exploration and planning phases; decisions may be promoted to long-term memory when finalized
-
-### session_notes.md
-
-**Purpose**: Captures notes, discoveries, and thoughts from the current session
-
-**Structure**:
-```markdown
-# Session Notes
-
-## Session: [DATE] - [START TIME]
-
-### Goals
-- [Goal 1]
-- [Goal 2]
-
-### Notes
-- [Note 1]
-- [Note 2]
-
-### Discoveries
-- [Discovery 1]
-- [Discovery 2]
-
-### Blockers
-- [Blocker 1]
-- [Blocker 2]
-
-### Next Session Plan
-- [Plan 1]
-- [Plan 2]
-
-Session End: [END TIME]
-Total Duration: [DURATION]
-```
-
-**Usage**: Updated throughout a development session; important notes may be promoted to long-term memory
-
-## Long-Term Memory Files
-
-Long-term memory files store information that persists across development sessions.
-
-### project_brief.md
-
-**Purpose**: Defines the core project requirements and goals
-
-**Structure**:
-```markdown
-# Project Brief
-
-## Overview
-[Project description]
-
-## Goals
-- [Goal 1]
-- [Goal 2]
-
-## Requirements
-- [Requirement 1]
-- [Requirement 2]
-
-## Constraints
-- [Constraint 1]
-- [Constraint 2]
-
-## Stakeholders
-- [Stakeholder 1]
-- [Stakeholder 2]
-
-## Timeline
-- Start: [Start Date]
-- Milestones:
-  - [Milestone 1]: [Date]
-  - [Milestone 2]: [Date]
-- Target Completion: [End Date]
-
-## Success Criteria
-- [Criterion 1]
-- [Criterion 2]
-```
-
-**Usage**: Updated when project requirements or goals change; referenced when making significant decisions
-
-### architecture.md
-
-**Purpose**: Documents the system architecture and component relationships
-
-**Structure**:
-```markdown
-# System Architecture
-
-## Overview
-[High-level architecture description]
-
-## Components
-
-### [Component 1]
-**Purpose:** [What this component does]
-**Responsibilities:**
-- [Responsibility 1]
-- [Responsibility 2]
-
-### [Component 2]
-**Purpose:** [What this component does]
-**Responsibilities:**
-- [Responsibility 1]
-- [Responsibility 2]
-
-## Data Flow
-[Describe how data flows through the system]
-
-## Technologies
-- [Technology 1]: [Purpose/Usage]
-- [Technology 2]: [Purpose/Usage]
-
-## Interfaces
-
-### [Interface 1]
-**Between:** [Component A] and [Component B]
-**Protocol:** [Protocol]
-**Data:** [Data exchanged]
-
-## Deployment Architecture
-[Describe how the system is deployed]
-
-## Security Considerations
-[Describe security architecture]
-```
-
-**Usage**: Updated when the system architecture changes; referenced during design and implementation
-
-### patterns.md
-
-**Purpose**: Records established coding patterns and conventions
-
-**Structure**:
-```markdown
-# Patterns & Conventions
-
-## Coding Standards
-
-### Naming Conventions
-- [Convention 1]
-- [Convention 2]
-
-### Structure Patterns
-- [Pattern 1]
-- [Pattern 2]
-
-### Error Handling
-- [Approach 1]
-- [Approach 2]
-
-## Design Patterns
-
-### [Pattern Category 1]
-
-#### [Pattern 1]
-**Usage:** [When to use]
-**Implementation:** [How to implement]
-**Example:**
-```[language]
-[Code example]
-```
-
-## Anti-patterns
-
-### [Anti-pattern 1]
-**Problem:** [Description]
-**Solution:** [Better approach]
-```
-
-**Usage**: Updated when new patterns emerge; referenced during implementation and code review
-
-### decisions.md
-
-**Purpose**: Records important project decisions
-
-**Structure**:
-```markdown
-# Project Decisions
-
-## Architecture Decisions
-
-### [Decision 1]
-**Decision:** [What was decided]
-**Date:** [When decided]
-**Status:** [Implemented/In Progress/Planned]
-**Context:** [Background and context]
-**Options Considered:**
-- [Option 1]: [Description]
-- [Option 2]: [Description]
-**Decision Rationale:** [Why this option was chosen]
-**Consequences:**
-- [Consequence 1]
-- [Consequence 2]
-
-## Implementation Decisions
-
-### [Decision 1]
-**Decision:** [What was decided]
-**Date:** [When decided]
-**Status:** [Implemented/In Progress/Planned]
-**Context:** [Background and context]
-**Options Considered:**
-- [Option 1]: [Description]
-- [Option 2]: [Description]
-**Decision Rationale:** [Why this option was chosen]
-**Consequences:**
-- [Consequence 1]
-- [Consequence 2]
-
-## Technology Decisions
-
-### [Decision 1]
-**Decision:** [What was decided]
-**Date:** [When decided]
-**Status:** [Implemented/In Progress/Planned]
-**Context:** [Background and context]
-**Options Considered:**
-- [Option 1]: [Description]
-- [Option 2]: [Description]
-**Decision Rationale:** [Why this option was chosen]
-**Consequences:**
-- [Consequence 1]
-- [Consequence 2]
-```
-
-**Usage**: Updated when significant decisions are made; referenced when making related decisions
-
-### progress.md
-
-**Purpose**: Tracks development progress and milestones
-
-**Structure**:
-```markdown
-# Project Progress
-
-## Current Status
-**Overall Progress:** [percentage]
-**Current Phase:** [phase]
-**Active Areas:** [areas]
-
-## Completed Items
-
-### [Feature/Component 1]
-**Completed:** [Date]
-**Description:** [What was completed]
-**Notes:** [Any relevant notes]
-
-## In Progress
-
-### [Feature/Component 1]
-**Started:** [Date]
-**Estimated Completion:** [Date]
-**Progress:** [percentage]
-**Current Focus:** [What's being worked on]
-**Blockers:** [Any blockers]
-
-## Planned Items
-
-### [Feature/Component 1]
-**Priority:** [High/Medium/Low]
-**Estimated Start:** [Date]
-**Estimated Effort:** [Effort]
-**Dependencies:** [Any dependencies]
-
-## Milestone Tracking
-
-### [Milestone 1]
-**Target Date:** [Date]
-**Current Status:** [On Track/At Risk/Delayed]
-**Completion:** [percentage]
-**Notes:** [Any notes]
-```
-
-**Usage**: Updated as development progresses; referenced when planning and reporting
-
-## Optional Specialized Memory Files
-
-You can extend the memory system with additional specialized files:
-
-### test_coverage.md
-
-**Purpose**: Tracks test coverage and testing priorities
-
-**Structure**:
-```markdown
-# Test Coverage
-
-## Overall Status
-**Unit Test Coverage:** [percentage]
-**Integration Test Coverage:** [percentage]
-**E2E Test Coverage:** [percentage]
-
-## Component Coverage
-
-### [Component 1]
-**Coverage:** [percentage]
-**Critical Areas:**
-- [Area 1]: [Coverage]
-- [Area 2]: [Coverage]
-**Gaps:**
-- [Gap 1]
-- [Gap 2]
-
-## Recent Test Improvements
-- [Improvement 1] - [Date]
-- [Improvement 2] - [Date]
-
-## Testing TODOs
-- [TODO 1]
-- [TODO 2]
-```
-
-### api.md
-
-**Purpose**: Documents API endpoints and usage
-
-**Structure**:
-```markdown
-# API Documentation
-
-## Endpoints
-
-### [Endpoint 1]
-**Path:** `[path]`
-**Method:** `[method]`
-**Description:** [description]
-**Request Parameters:**
-- `[param1]`: [description]
-- `[param2]`: [description]
-**Response:**
-```json
-[Example response]
-```
-
-## Authentication
-[Authentication mechanism details]
-
-## Error Handling
-[How API errors are handled and returned]
-```
-
-### database.md
-
-**Purpose**: Documents database schema and operations
-
-**Structure**:
-```markdown
-# Database Documentation
-
-## Schema
-
-### [Table/Collection 1]
-**Purpose:** [What this stores]
-**Fields:**
-- `[field1]`: [type] - [description]
-- `[field2]`: [type] - [description]
-**Indexes:**
-- [index1]
-- [index2]
-**Relationships:**
-- [relationship1]
-- [relationship2]
-
-## Migrations
-
-### [Migration 1]
-**Date:** [Date]
-**Description:** [What changed]
-**Reason:** [Why it changed]
-
-## Performance Considerations
-- [Consideration 1]
-- [Consideration 2]
-```
-
-## Memory Flow
-
-The memory system follows these information flow patterns:
-
-1. **Short-Term to Long-Term**:
-   - Working decisions → Decisions
-   - Session notes → Various long-term files
-   - Current context → Progress
-
-2. **Event-Based Updates**:
-   - File creation → Progress, Current context
-   - Git operations → Progress, Current context
-   - Build events → Progress, Session notes
-
-3. **Mode-Specific Focus**:
-   - THINK mode → Working decisions, Session notes
-   - PLAN mode → Current context, Working decisions
-   - IMPLEMENT mode → Progress, Current context
-   - REVIEW mode → Session notes, Working decisions
-   - DOCUMENT mode → All long-term memory
-
-## Extending Memory Structure
-
-You can extend the memory structure by:
-
-1. **Adding new memory files** in either short-term or long-term directories
-2. **Updating config.json** to include references to new files
-3. **Creating specialized files** for specific aspects of your project
-4. **Defining new memory relationships** through events and mode configurations
-
-When extending, maintain the hierarchy and update flow to ensure consistency.
-
-## Best Practices
-
-1. **Keep files focused**: Each memory file should have a clear purpose
-2. **Follow established formats**: Maintain consistent structure across memory files
-3. **Date and timestamp entries**: Include timestamps for all updates
-4. **Regular consolidation**: Periodically merge related information
-5. **Cleanup outdated information**: Archive or remove obsolete content
-6. **Cross-reference related content**: Link between memory files when appropriate
-7. **Maintain hierarchy**: Respect the short-term to long-term promotion flow
+## Troubleshooting Commands
+
+If commands aren't working as expected:
+
+1. Check command syntax:
+   ```
+   /memory help
+   /memory <command> -h
+   ```
+
+2. Verify memory system status:
+   ```
+   /memory status
+   /context status
+   ```
+
+3. Reload context if needed:
+   ```
+   /context refresh
+   ```
+
+4. Reset to default mode:
+   ```
+   # Select THINK in UI dropdown
+   /mode think
+   ```
