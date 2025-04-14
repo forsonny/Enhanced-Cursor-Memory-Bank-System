@@ -1,4 +1,4 @@
-# Usage Guide
+# Usage Guide (Updated)
 
 This guide explains how to use the Enhanced Memory Bank System (EMBS) for Cursor effectively.
 
@@ -17,17 +17,19 @@ The system operates in different modes, each with specialized memory behaviors:
 - **REVIEW**: Review mode for analyzing code
 - **DOCUMENT**: Documentation mode for updating docs
 
+## Understanding the System's Approach
+
+The Enhanced Memory Bank System works with Cursor's capabilities:
+
+1. **AI reads and follows rules** in .mdc files
+2. **AI requests to see memory files** when they're relevant
+3. **You provide access to memory files** when requested
+4. **You report significant events** to trigger memory updates
+5. **AI suggests memory updates** that you can implement
+
+This approach ensures memory persists across sessions while working within Cursor's environment.
+
 ## Getting Started
-
-### Initializing the System
-
-After installation, initialize the memory system:
-
-```
-/memory init
-```
-
-This will set up the memory system and create initial files if they don't exist.
 
 ### Checking System Status
 
@@ -71,6 +73,8 @@ Mode switching requires two steps:
 Examples:
 - Select "THINK" in UI, then type `/mode think`
 - Select "PLAN" in UI, then type `/mode plan`
+
+The AI will verify the currently selected mode matches your command before proceeding.
 
 ### Mode-Specific Workflows
 
@@ -168,31 +172,33 @@ Use when creating documentation:
 
 ### Core Commands
 
-- `/memory init` - Initialize the memory system
 - `/memory status` - Display current memory system status
 - `/memory help` - Show available memory commands
 
 ### Memory Retrieval
 
-- `/memory recall <context>` - Retrieve information from specified memory context
+- `/memory recall <context>` - Request to see specific memory context
   ```
   /memory recall architecture
   /memory recall patterns
   /memory recall current_context
   ```
+  The AI will ask you to open the relevant file.
 
 ### Memory Updates
+
+- `/memory update <file> <content>` - Suggest updates to specific memory file
+  ```
+  /memory update decisions.md "Decision: We will use TypeScript"
+  ```
+  The AI will provide formatted content for you to add to the file.
 
 - `/memory save <context>` - Save current information to specified memory context
   ```
   /memory save architecture
   /memory save patterns -t  # Save as temporary (short-term)
   ```
-
-- `/memory update <file> <content>` - Update specific memory file
-  ```
-  /memory update decisions.md "Decision: We will use TypeScript"
-  ```
+  The AI will suggest content to add to the appropriate file.
 
 ### Memory Organization
 
@@ -200,16 +206,19 @@ Use when creating documentation:
   ```
   /memory promote working_decisions.md
   ```
+  The AI will suggest what content to move from short-term to long-term memory.
 
 - `/memory archive <file>` - Archive memory that's no longer relevant
   ```
   /memory archive old_patterns.md
   ```
+  The AI will provide instructions for archiving.
 
 - `/memory consolidate <files>` - Combine related memories
   ```
   /memory consolidate auth_*.md authentication.md
   ```
+  The AI will ask to see the source files, then provide consolidated content.
 
 ### Memory Search
 
@@ -218,24 +227,38 @@ Use when creating documentation:
   /memory search authentication
   /memory search -c architecture database  # Search in specific context
   ```
+  The AI will request to see relevant files to search.
 
-## Automatic Context Loading
+## Event Reporting
 
-The system automatically loads relevant memory files based on:
+Since the system can't automatically detect events, you need to report significant events:
 
-- **File Types**: Different file extensions trigger loading specific memory
-- **File Locations**: Files in specific directories load relevant memory
-- **Current Mode**: Each mode prioritizes different memory files
-- **Project Complexity**: More complex projects load more comprehensive context
+```
+/memory event <event_type> <details>
+```
 
 For example:
-- Opening a `.ts` file loads TypeScript patterns
-- Editing files in `/api/` loads API-related memory
-- Being in THINK mode loads architecture and patterns
+```
+/memory event commit "Implemented user authentication"
+```
+
+Common event types:
+- `commit` - Code committed to repository
+- `build_success` - Build completed successfully
+- `build_failure` - Build failed
+- `test_success` - Tests passed
+- `test_failure` - Tests failed
+- `create` - New file created
+- `modify` - File modified
+- `branch` - Git branch changed
+- `session_start` - Beginning development session
+- `session_end` - Ending development session
+
+When you report an event, the AI will suggest appropriate memory updates based on the event type.
 
 ## Memory Annotations
 
-You can update memory automatically using code comments:
+You can create code annotations that the AI recognizes when it sees them:
 
 ```javascript
 // @memory:note This approach handles edge cases better
@@ -253,42 +276,14 @@ router.get('/api/:resource', authMiddleware, (req, res) => {
 ```
 
 Available annotations:
-- `@memory:note` - Adds to session_notes.md
-- `@memory:decision` - Adds to decisions.md
-- `@memory:pattern` - Adds to patterns.md
-- `@memory:architecture` - Adds to architecture.md
-- `@memory:todo` - Adds to current_context.md
-- `@memory:progress` - Updates progress.md
+- `@memory:note` - For session_notes.md
+- `@memory:decision` - For decisions.md
+- `@memory:pattern` - For patterns.md
+- `@memory:architecture` - For architecture.md
+- `@memory:todo` - For current_context.md
+- `@memory:progress` - For progress.md
 
-## Advanced Usage
-
-### Configuration Customization
-
-Adjust memory system behavior:
-
-```
-/memory config short_term.retention 14d
-/memory config auto_context.max_files 10
-/memory config events.notification_level verbose
-```
-
-### Feature Toggling
-
-Enable/disable specific features:
-
-```
-/memory toggle auto_context
-/memory toggle events.fileCreation
-/memory toggle auto_promote
-```
-
-### Command Shortcuts
-
-Quick access to common commands:
-
-- `/ms` - Alias for `/memory status`
-- `/mr <context>` - Alias for `/memory recall <context>`
-- `/mu <file> <content>` - Alias for `/memory update <file> <content>`
+When the AI sees these annotations, it will suggest appropriate memory updates.
 
 ## Memory-First Workflow
 
@@ -300,33 +295,33 @@ For best results, follow this workflow:
 4. Use **REVIEW mode** to analyze implementation
 5. Finish with **DOCUMENT mode** to update docs
 
-Throughout this process, memory is automatically maintained, ensuring continuity across sessions.
+Throughout this process, report significant events and implement suggested memory updates to maintain continuity across sessions.
 
 ## Best Practices
 
 1. **Keep memory files focused**: Don't try to put everything in one file
 2. **Use consistent terminology**: Be consistent in naming and descriptions
 3. **Regularly review memory**: Periodically check for outdated information
-4. **Promote important short-term memory**: Don't let valuable insights remain temporary
-5. **Use appropriate memory for the task**: Patterns in patterns.md, decisions in decisions.md, etc.
-6. **Let the system work automatically**: Use annotations and let events trigger updates
+4. **Report significant events**: Use the event reporting system consistently
+5. **Implement suggested updates**: When the AI suggests memory updates, implement them
+6. **Promote important short-term memory**: Don't let valuable insights remain temporary
 7. **Switch modes deliberately**: Each mode has specific strengths for different tasks
 
 ## Troubleshooting
 
-If memory context seems missing:
+If the AI seems to be missing context:
 
 1. Check if the memory file exists:
    ```
    ls -la .cursor/memory/long_term/
    ```
 
-2. Verify file content:
+2. Open the relevant file when requested:
    ```
    cat .cursor/memory/long_term/patterns.md
    ```
 
-3. Manually load context:
+3. Manually provide context:
    ```
    /memory recall patterns
    ```

@@ -1,215 +1,151 @@
-# Event System Documentation
+# Event System Documentation (Updated)
 
-This document explains the event-triggered memory update system in the Enhanced Memory Bank System.
+This document explains the user-reported event system in the Enhanced Memory Bank System.
 
 ## Overview
 
-The event system automatically updates memory files based on development activities without requiring explicit commands. It monitors for specific events and triggers appropriate memory updates.
+The event system allows you to report significant development events that should trigger memory updates. Since the AI can't automatically detect events, you need to explicitly report them using commands.
 
-## Event Types
+## Reporting Events
 
-The system detects and responds to these event types:
-
-### File Events
-
-| Event | Description | Memory Updates |
-|-------|-------------|----------------|
-| **File Creation** | New files added to the project | progress.md, current_context.md |
-| **File Modification** | Changes to existing files | current_context.md, progress.md |
-| **File Deletion** | Removal of project files | current_context.md, progress.md |
-
-### Build Events
-
-| Event | Description | Memory Updates |
-|-------|-------------|----------------|
-| **Successful Build** | Build completes successfully | progress.md, current_context.md |
-| **Failed Build** | Build fails | current_context.md, session_notes.md |
-
-### Test Events
-
-| Event | Description | Memory Updates |
-|-------|-------------|----------------|
-| **Successful Tests** | Tests pass | progress.md |
-| **Failed Tests** | Tests fail | current_context.md, session_notes.md |
-
-### Git Events
-
-| Event | Description | Memory Updates |
-|-------|-------------|----------------|
-| **Git Commit** | Code committed to repository | progress.md, current_context.md |
-| **Branch Change** | Switch between git branches | current_context.md |
-| **Merge Operation** | Merging between branches | current_context.md, progress.md |
-
-### Session Events
-
-| Event | Description | Memory Updates |
-|-------|-------------|----------------|
-| **Session Start** | Beginning of development session | current_context.md, session_notes.md |
-| **Session End** | End of development session | progress.md, session_notes.md |
-
-### Mode Events
-
-| Event | Description | Memory Updates |
-|-------|-------------|----------------|
-| **Mode Transition** | Switching between operational modes | Depends on specific transition |
-
-### User Annotation Events
-
-| Event | Description | Memory Updates |
-|-------|-------------|----------------|
-| **@memory:note** | User adds a note annotation | session_notes.md |
-| **@memory:decision** | User documents a decision | decisions.md |
-| **@memory:pattern** | User identifies a pattern | patterns.md |
-| **@memory:architecture** | User notes architecture detail | architecture.md |
-| **@memory:todo** | User flags a todo item | current_context.md |
-| **@memory:progress** | User records progress | progress.md |
-
-## Event Processing
-
-### Priority Order
-
-Events are processed in this priority order (high to low):
-
-1. Explicit commands (e.g., `/memory update`)
-2. User annotations (e.g., `// @memory:decision`)
-3. Mode transitions
-4. Git operations
-5. Build/test events
-6. File operations
-7. Session boundaries
-
-### Event Batching
-
-Similar events within a short timeframe are batched to prevent excessive updates:
-
-- Multiple file modifications are treated as a single logical change
-- Multiple test runs are consolidated into a single result
-- Related memory updates are combined for consistency
-
-### Conflict Resolution
-
-When events conflict, the system resolves them using these rules:
-
-- Explicit commands override automatic events
-- Later events override earlier ones in same priority level
-- User is prompted for resolution when automatic resolution fails
-
-### Threshold Filtering
-
-Events are filtered based on significance:
-
-- Minor file changes may not trigger updates
-- Frequent build attempts may be consolidated
-- Trivial git operations may be ignored
-
-## Configuration
-
-The event system is configured in `.cursor/memory/config.json`:
-
-```json
-{
-  "events": {
-    "enabled": true,
-    "notification_level": "standard",
-    "batch_window": "5s",
-    "fileCreation": {
-      "enabled": true,
-      "memoryUpdates": ["progress", "current_context"]
-    },
-    "fileModification": {
-      "enabled": true,
-      "threshold": "significant",
-      "memoryUpdates": ["current_context", "progress"]
-    },
-    "buildEvents": {
-      "enabled": true,
-      "failureUpdates": ["current_context", "session_notes"],
-      "successUpdates": ["progress"]
-    },
-    "testExecution": {
-      "enabled": true,
-      "failureUpdates": ["current_context", "session_notes"],
-      "successUpdates": ["progress"]
-    },
-    "gitOperations": {
-      "enabled": true,
-      "commitUpdates": ["progress"],
-      "branchUpdates": ["current_context"]
-    },
-    "sessionBoundaries": {
-      "enabled": true,
-      "startUpdates": ["current_context", "session_notes"],
-      "endUpdates": ["progress", "session_notes"]
-    },
-    "modeTransitions": {
-      "enabled": true,
-      "updates": {
-        "THINK": ["working_decisions", "session_notes"],
-        "PLAN": ["current_context", "working_decisions"],
-        "IMPLEMENT": ["progress", "current_context"],
-        "REVIEW": ["session_notes", "working_decisions"],
-        "DOCUMENT": ["progress", "decisions", "patterns", "architecture"]
-      }
-    },
-    "annotations": {
-      "enabled": true,
-      "patterns": {
-        "note": "session_notes.md",
-        "decision": "decisions.md",
-        "pattern": "patterns.md",
-        "architecture": "architecture.md",
-        "todo": "current_context.md",
-        "progress": "progress.md"
-      }
-    }
-  }
-}
-```
-
-### Configuration Options
-
-| Option | Description | Values |
-|--------|-------------|--------|
-| `enabled` | Master toggle for event system | `true`/`false` |
-| `notification_level` | How much feedback on events | `none`, `minimal`, `standard`, `verbose` |
-| `batch_window` | Time window for batching similar events | Time string (e.g., `5s`, `1m`) |
-| `<event_type>.enabled` | Enable/disable specific event type | `true`/`false` |
-| `<event_type>.memoryUpdates` | Which files to update for event | Array of memory file names |
-| `<event_type>.threshold` | Significance threshold for triggering | `any`, `minor`, `significant`, `major` |
-
-## Notifications
-
-The system notifies users about memory updates with configurable detail levels:
-
-### Notification Levels
-
-- `none`: No notifications
-- `minimal`: Essential updates only
-- `standard`: All significant updates
-- `verbose`: All updates with details
-
-### Notification Format
+To report a development event, use this command:
 
 ```
-MEMORY UPDATE: progress.md
-TRIGGER: Successful build
-CHANGES: Added milestone "Authentication API completed"
-```
-
-## Using Annotations
-
-Code annotations allow direct memory updates from code comments:
-
-### Syntax
-
-```
-// @memory:<type> <content>
+/memory event <event_type> <description>
 ```
 
 For example:
+```
+/memory event commit "Implemented user authentication flow"
+```
+
+This tells the AI that you've committed code that implements authentication, and it will suggest appropriate memory updates based on this information.
+
+## Supported Event Types
+
+The system recognizes these event categories:
+
+### File Events
+
+| Event Type | Description | Example |
+|------------|-------------|---------|
+| `create` | New file added | `/memory event create "Created auth middleware"` |
+| `modify` | File modified | `/memory event modify "Updated login component"` |
+| `delete` | File removed | `/memory event delete "Removed legacy auth"` |
+
+### Build Events
+
+| Event Type | Description | Example |
+|------------|-------------|---------|
+| `build_success` | Build completed successfully | `/memory event build_success "All tests passing"` |
+| `build_failure` | Build failed | `/memory event build_failure "Auth module failing"` |
+
+### Test Events
+
+| Event Type | Description | Example |
+|------------|-------------|---------|
+| `test_success` | Tests passed | `/memory event test_success "Auth tests passing"` |
+| `test_failure` | Tests failed | `/memory event test_failure "Login tests failing"` |
+
+### Git Events
+
+| Event Type | Description | Example |
+|------------|-------------|---------|
+| `commit` | Code committed | `/memory event commit "Implemented authentication"` |
+| `branch` | Branch changed | `/memory event branch "Switched to feature/auth"` |
+| `merge` | Branches merged | `/memory event merge "Merged auth branch to main"` |
+
+### Session Events
+
+| Event Type | Description | Example |
+|------------|-------------|---------|
+| `session_start` | Beginning development session | `/memory event session_start "Starting auth work"` |
+| `session_end` | Ending development session | `/memory event session_end "Completed login feature"` |
+
+### Mode Events
+
+| Event Type | Description | Example |
+|------------|-------------|---------|
+| `mode_change` | Switched operational modes | `/memory event mode_change "PLAN to IMPLEMENT"` |
+
+## Event Response Process
+
+When you report an event, the AI will follow this process:
+
+1. **Acknowledge the event**: Confirm that it understands the reported event
+   - "I've noted your report of committing code for authentication implementation"
+
+2. **Suggest memory updates**: Based on the event type, suggest appropriate memory updates
+   - "Based on this commit event, I suggest updating these memory files:"
+
+3. **Provide update content**: Offer specific content to be added to memory files
+   - "Here's the content you can add to progress.md:"
+
+4. **Confirm implementation**: Ask for confirmation when updates are completed
+   - "Have you updated the memory files? Let me know when it's done."
+
+## Event-Memory Relationships
+
+Different events typically trigger updates to specific memory files:
+
+```
+File Creation:
+  → Updates to progress.md with new component information
+  → Updates to architecture.md for structural additions
+  → Updates to current_context.md if related to active task
+
+File Modification:
+  → Updates to current_context.md with latest changes
+  → Possible pattern extraction for repeated modifications
+  → Updates to progress.md for significant milestones
+
+Successful Build:
+  → Updates to progress.md with build success
+  → Updates to current_context.md with next steps
+  → Additions to session_notes.md with build information
+
+Failed Build:
+  → Additions to current_context.md with issues
+  → Updates to session_notes.md with error details
+  → Possible additions to patterns.md for recurring problems
+
+Test Execution:
+  → Updates to progress.md with test results
+  → Additions to session_notes.md with testing notes
+  → Possible pattern updates for test approaches
+
+Git Commit:
+  → Updates to progress.md with commit milestone
+  → Possible decision documentation from commit message
+  → Updates to current_context.md with next steps
+
+Branch Change:
+  → Updates to current_context.md with branch context
+  → Loading relevant feature context from long-term memory
+  → Possible context switch in progress.md
+
+Mode Transition:
+  → Updates to specific memory files based on mode rules
+  → Promoting/consolidating memory based on transition type
+  → Updates to current_context.md with mode-specific focus
+
+Session Start:
+  → Loading relevant memory context
+  → Resuming current_context.md from previous session
+  → Updates to session_notes.md with session start
+
+Session End:
+  → Consolidating session_notes.md
+  → Updates to progress.md with session accomplishments
+  → Promoting important short-term to long-term memory
+```
+
+## Code Annotations
+
+In addition to explicit event reporting, the system recognizes annotations in code comments that suggest memory updates:
 
 ```javascript
-// @memory:note This approach handles edge cases better
+// @memory:note This approach handles edge cases better than alternatives
 function handleEdgeCases() {
   // Implementation
 }
@@ -238,142 +174,88 @@ function authenticationFlow() {
 }
 ```
 
-### Available Annotation Types
+When the AI sees these annotations in code, it will suggest appropriate memory updates.
 
-| Annotation | Target File | Purpose |
-|------------|-------------|---------|
-| `@memory:note` | session_notes.md | Record observations and findings |
-| `@memory:decision` | decisions.md | Document important decisions |
-| `@memory:pattern` | patterns.md | Establish coding patterns |
-| `@memory:architecture` | architecture.md | Document architectural details |
-| `@memory:todo` | current_context.md | Track development tasks |
-| `@memory:progress` | progress.md | Record development progress |
+## Memory Update Format
 
-## Manual Event Control
+When suggesting memory updates, the AI formats content appropriately for the target file:
 
-The event system can be manually controlled with these commands:
+### Progress Updates
 
-| Command | Purpose | Example |
-|---------|---------|---------|
-| `/events status` | Check event system status | `/events status` |
-| `/events enable <type>` | Enable specific event type | `/events enable fileCreation` |
-| `/events disable <type>` | Disable specific event type | `/events disable buildEvents` |
-| `/events trigger <type>` | Manually trigger event processing | `/events trigger gitOperations` |
-| `/events config <key> <value>` | Configure event system | `/events config notification_level verbose` |
+```markdown
+### User Authentication
+**Completed:** 2025-04-14
+**Description:** Implemented basic authentication flow
+**Status:** In progress (70%)
+**Next Steps:** Add password reset functionality
+```
 
-## Event Logs
+### Decision Records
 
-The system maintains an event log in `.cursor/memory/event_log.json` that tracks:
+```markdown
+### Authentication Approach
+**Decision:** Use JWT with asymmetric keys
+**Date:** 2025-04-14
+**Rationale:** Better security and support for microservices
+**Implications:**
+- Need to implement key rotation
+- Simplifies cross-service authentication
+```
 
-- Event type and timestamp
-- Trigger source
-- Affected memory files
-- Changes made
-- Batching information
+### Pattern Documentation
 
-This log can be used to audit and debug memory changes.
+```markdown
+### Repository Pattern
+**Usage:** Data access abstraction
+**Implementation:** Interface + concrete implementation
+**Example:**
+```typescript
+interface UserRepository {
+  findById(id: string): Promise<User>;
+}
+```
+
+## Event Reporting Best Practices
+
+To get the most out of the event system:
+
+1. **Report meaningful events**: Focus on events that actually change project state
+2. **Be specific in descriptions**: Include relevant details about what changed
+3. **Report events promptly**: Report events when they occur for accurate history
+4. **Use consistent event types**: Be consistent in how you categorize events
+5. **Implement suggested updates**: When the AI suggests memory updates, add them
+6. **Use annotations in code**: Add annotations when writing significant code
+7. **Report session boundaries**: Use session_start and session_end to mark boundaries
+
+## Event Reporting Automation
+
+While the system requires manual event reporting, you can make this easier by:
+
+1. **Creating shell aliases** for common event commands
+2. **Adding git hooks** that prompt you to report commit events
+3. **Using IDE snippets** for common annotations
+4. **Setting up build scripts** that report build events
 
 ## Mode-Specific Event Behavior
 
-Different operational modes influence how events are processed:
+Different operational modes influence how the AI responds to events:
 
-| Mode | Event Handling |
-|------|----------------|
-| **THINK** | Emphasizes research findings and exploration notes |
-| **PLAN** | Focuses on task breakdown and implementation plans |
-| **IMPLEMENT** | Prioritizes progress updates and implementation details |
-| **REVIEW** | Highlights improvement suggestions and issue tracking |
-| **DOCUMENT** | Balances updates across all long-term memory files |
+- **THINK Mode**: Emphasizes research findings and exploration notes
+- **PLAN Mode**: Focuses on task breakdown and implementation plans
+- **IMPLEMENT Mode**: Prioritizes progress updates and implementation details
+- **REVIEW Mode**: Highlights improvement suggestions and issue tracking
+- **DOCUMENT Mode**: Balances updates across all long-term memory files
 
-## Best Practices
+The AI adjusts its event response based on the current operational mode.
 
-1. **Enable relevant events only**: Turn off events you don't need
-2. **Use annotations liberally**: They're the most direct way to update memory
-3. **Set appropriate thresholds**: Tune significance thresholds to avoid noise
-4. **Review event logs periodically**: Look for patterns or missed updates
-5. **Adjust notification levels**: Use verbose during setup, standard for daily use
-6. **Create custom event mappings**: Configure which files update for each event
+## Troubleshooting Event Reporting
 
-## Advanced Configuration
+If event reporting isn't working as expected:
 
-### Custom Event Types
+1. **Check command syntax**: Make sure you're using the correct event type
+2. **Verify mode alignment**: Some events make more sense in certain modes
+3. **Check file existence**: Make sure the target memory files exist
+4. **Be specific in descriptions**: Provide enough detail for meaningful updates
+5. **View suggested updates**: Make sure to implement the AI's suggested changes
 
-You can define custom event types in the configuration:
-
-```json
-"customEvents": {
-  "deploymentEvents": {
-    "enabled": true,
-    "memoryUpdates": ["progress", "architecture"],
-    "triggers": ["*deploy*", "*release*"]
-  }
-}
-```
-
-### Event Filters
-
-Filter events based on file patterns:
-
-```json
-"fileModification": {
-  "enabled": true,
-  "filters": {
-    "include": ["src/**/*.ts", "src/**/*.tsx"],
-    "exclude": ["**/*.test.ts", "**/*.spec.ts"]
-  },
-  "memoryUpdates": ["current_context", "progress"]
-}
-```
-
-### Complex Update Rules
-
-Define complex rules for updates:
-
-```json
-"gitOperations": {
-  "enabled": true,
-  "rules": [
-    {
-      "condition": "commit.message.includes('fix')",
-      "updates": ["progress.md:bugs", "current_context.md:fixes"]
-    },
-    {
-      "condition": "commit.message.includes('feat')",
-      "updates": ["progress.md:features", "current_context.md:new_features"]
-    }
-  ]
-}
-```
-
-## Troubleshooting Events
-
-### Common Issues
-
-1. **Events not triggering**:
-   - Check if event type is enabled in config
-   - Verify the significance threshold isn't too high
-   - Ensure memory files exist
-
-2. **Too many updates**:
-   - Increase significance threshold
-   - Adjust batch window duration
-   - Disable event types you don't need
-
-3. **Updates going to wrong files**:
-   - Check memoryUpdates configuration
-   - Verify annotation type matches intended target
-
-4. **Annotation not working**:
-   - Ensure syntax is correct (// @memory:type content)
-   - Check that annotations are enabled in config
-   - Verify target memory file exists
-
-### Resetting Event System
-
-If the event system becomes misconfigured:
-
-```
-/events config reset
-```
-
-This resets event configuration to defaults without losing memory content.
+If the AI seems confused by an event, try providing more context about what happened and why it's significant.

@@ -1,4 +1,4 @@
-# Command Reference
+# Command Reference (Updated)
 
 This document provides a complete reference for all commands available in the Enhanced Memory Bank System.
 
@@ -19,7 +19,6 @@ Command groups include:
 - `review` - REVIEW mode operations
 - `document` - DOCUMENT mode operations
 - `context` - Context management operations
-- `events` - Event system operations
 
 ## Memory Commands
 
@@ -27,7 +26,6 @@ Command groups include:
 
 | Command | Arguments | Description | Example |
 |---------|-----------|-------------|---------|
-| `/memory init` | None | Initialize the memory system | `/memory init` |
 | `/memory status` | None | Display current memory system status | `/memory status` |
 | `/memory help` | None | Show available memory commands and usage | `/memory help` |
 
@@ -35,33 +33,39 @@ Command groups include:
 
 | Command | Arguments | Options | Description | Example |
 |---------|-----------|---------|-------------|---------|
-| `/memory save` | `<context>` | `-t` (temporary)<br>`-m <message>` (message) | Save current information to specified memory context | `/memory save architecture`<br>`/memory save patterns -t`<br>`/memory save decisions -m "Auth decision"` |
-| `/memory recall` | `<context>` | `-v` (verbose) | Retrieve information from specified memory context | `/memory recall patterns`<br>`/memory recall architecture -v` |
-| `/memory update` | `<file> <content>` | None | Update specific memory file | `/memory update decisions.md "Decision: We will use TypeScript"` |
+| `/memory save` | `<context>` | `-t` (temporary)<br>`-m <message>` (message) | Suggest saving information to specified memory context | `/memory save architecture`<br>`/memory save patterns -t`<br>`/memory save decisions -m "Auth decision"` |
+| `/memory recall` | `<context>` | `-v` (verbose) | Request to see information from specified memory context | `/memory recall patterns`<br>`/memory recall architecture -v` |
+| `/memory update` | `<file> <content>` | None | Suggest updating specific memory file | `/memory update decisions.md "Decision: We will use TypeScript"` |
 | `/memory search` | `<query>` | `-c <context>` (context) | Search across memory for relevant information | `/memory search authentication`<br>`/memory search -c architecture database` |
 
 ### Memory Organization Commands
 
 | Command | Arguments | Options | Description | Example |
 |---------|-----------|---------|-------------|---------|
-| `/memory promote` | `<source>` | `-d <destination>` (destination) | Promote short-term memory to long-term | `/memory promote working_decisions.md`<br>`/memory promote working_decisions.md -d decisions.md` |
-| `/memory archive` | `<file>` | None | Archive memory that's no longer actively relevant | `/memory archive old_patterns.md` |
-| `/memory consolidate` | `<files> <target>` | None | Combine related memories into a cohesive document | `/memory consolidate auth_*.md authentication.md` |
+| `/memory promote` | `<source>` | `-d <destination>` (destination) | Suggest promoting short-term memory to long-term | `/memory promote working_decisions.md`<br>`/memory promote working_decisions.md -d decisions.md` |
+| `/memory archive` | `<file>` | None | Suggest archiving memory that's no longer actively relevant | `/memory archive old_patterns.md` |
+| `/memory consolidate` | `<files> <target>` | None | Suggest combining related memories into a cohesive document | `/memory consolidate auth_*.md authentication.md` |
+
+### Event Reporting Commands
+
+| Command | Arguments | Description | Example |
+|---------|-----------|-------------|---------|
+| `/memory event` | `<type> <details>` | Report a development event | `/memory event commit "Implemented auth"`<br>`/memory event build_success "All tests passing"` |
 
 ### Configuration Commands
 
 | Command | Arguments | Description | Example |
 |---------|-----------|-------------|---------|
-| `/memory config` | `<key> <value>` | Update memory system configuration | `/memory config short_term.retention 7d`<br>`/memory config auto_context.max_files 10` |
-| `/memory toggle` | `<feature>` | Enable/disable specific memory features | `/memory toggle auto_recall`<br>`/memory toggle events.fileCreation` |
+| `/memory config` | `<key> <value>` | Suggest updates to memory system configuration | `/memory config short_term.retention 7d`<br>`/memory config auto_context.max_files 10` |
+| `/memory toggle` | `<feature>` | Suggest enabling/disabling specific memory features | `/memory toggle auto_recall`<br>`/memory toggle events.fileCreation` |
 
 ### Command Shortcuts
 
 | Shortcut | Full Command | Description | Example |
 |----------|--------------|-------------|---------|
 | `/ms` | `/memory status` | Check memory system status | `/ms` |
-| `/mr` | `/memory recall` | Recall memory context | `/mr patterns` |
-| `/mu` | `/memory update` | Update memory file | `/mu decisions.md "New decision"` |
+| `/mr` | `/memory recall` | Request memory context | `/mr patterns` |
+| `/mu` | `/memory update` | Suggest memory file update | `/mu decisions.md "New decision"` |
 
 ## Mode Commands
 
@@ -119,21 +123,21 @@ Command groups include:
 
 | Command | Arguments | Description | Example |
 |---------|-----------|-------------|---------|
-| `/context load` | `<memory_file>` | Explicitly load specific memory file | `/context load patterns.md` |
-| `/context unload` | `<memory_file>` | Remove specific memory file from context | `/context unload architecture.md` |
-| `/context refresh` | None | Reload all context based on current state | `/context refresh` |
-| `/context status` | None | Show currently loaded memory files | `/context status` |
-| `/context suggest` | None | Get suggestions for additional relevant context | `/context suggest` |
+| `/context load` | `<memory_file>` | Request to see a specific memory file | `/context load patterns.md` |
+| `/context status` | None | Report which memory files the AI has seen | `/context status` |
+| `/context suggest` | None | Get suggestions for helpful memory files | `/context suggest` |
 
-## Event Commands
+## How Commands Work
 
-| Command | Arguments | Description | Example |
-|---------|-----------|-------------|---------|
-| `/events status` | None | Check event system status | `/events status` |
-| `/events enable` | `<type>` | Enable specific event type | `/events enable fileCreation` |
-| `/events disable` | `<type>` | Disable specific event type | `/events disable buildEvents` |
-| `/events trigger` | `<type>` | Manually trigger event processing | `/events trigger gitOperations` |
-| `/events config` | `<key> <value>` | Configure event system | `/events config notification_level verbose` |
+In the Enhanced Memory Bank System, commands follow this execution flow:
+
+1. **You type a command** in Cursor's chat interface
+2. **The AI interprets the command** based on its rule files
+3. **The AI requests necessary information** if it needs to see specific files
+4. **The AI suggests appropriate actions** based on the command
+5. **You implement the suggested actions** to maintain the memory system
+
+Since the AI cannot directly modify files, most commands result in suggestions that you need to implement manually.
 
 ## Command Help System
 
@@ -161,39 +165,53 @@ When a memory command is executed, the response follows this format:
 
 ```
 MEMORY COMMAND: <command>
-STATUS: <success|failure>
+STATUS: <success|planning|failure>
 DETAILS: <relevant details about operation>
+ACTION NEEDED: <what you need to do>
 NEXT STEPS: <suggested follow-up actions>
 ```
 
-## Command Chaining
+## Event Types for /memory event
 
-Commands can be chained using the `&&` operator:
+The `/memory event` command supports these event types:
 
-```
-/memory recall architecture && /memory update architecture.md "Updated architecture"
-```
+### File Events
+- `create` - New file created
+- `modify` - File modified
+- `delete` - File deleted
 
-## Command Permissions
+### Build Events
+- `build_success` - Build completed successfully
+- `build_failure` - Build failed
 
-All memory commands are available in any operational mode, but some have mode-specific behaviors:
+### Test Events
+- `test_success` - Tests passed
+- `test_failure` - Tests failed
 
-- Save operations in Review mode include review metadata
-- Update operations in Implement mode include implementation details
-- Consolidate operations in Think mode include decision reasoning
+### Git Events
+- `commit` - Code committed
+- `branch` - Branch changed
+- `merge` - Branches merged
 
-## Annotation Commands
+### Session Events
+- `session_start` - Beginning development session
+- `session_end` - Ending development session
 
-These aren't typed as commands, but are used in code comments to trigger memory updates:
+### Mode Events
+- `mode_change` - Changed operational modes
+
+## Code Annotations
+
+While not commands in the traditional sense, these code annotations trigger memory updates when the AI sees them:
 
 | Annotation | Purpose | Example |
 |------------|---------|---------|
-| `// @memory:note` | Add note to session_notes.md | `// @memory:note This approach handles edge cases better` |
-| `// @memory:decision` | Add to decisions.md | `// @memory:decision We're using JWT for authentication` |
-| `// @memory:pattern` | Add to patterns.md | `// @memory:pattern This pattern for API routing should be followed` |
-| `// @memory:architecture` | Add to architecture.md | `// @memory:architecture This service handles payment processing` |
-| `// @memory:todo` | Add to current_context.md | `// @memory:todo Refactor this component to use the new pattern` |
-| `// @memory:progress` | Update progress.md | `// @memory:progress Completed user authentication flow` |
+| `@memory:note` | Add to session_notes.md | `// @memory:note This approach handles edge cases better` |
+| `@memory:decision` | Add to decisions.md | `// @memory:decision We're using JWT for authentication` |
+| `@memory:pattern` | Add to patterns.md | `// @memory:pattern This pattern should be followed for all API routes` |
+| `@memory:architecture` | Add to architecture.md | `// @memory:architecture This service handles payment processing` |
+| `@memory:todo` | Add to current_context.md | `// @memory:todo Refactor this component to use the new pattern` |
+| `@memory:progress` | Update progress.md | `// @memory:progress Completed user authentication flow` |
 
 ## Examples
 
@@ -201,16 +219,25 @@ These aren't typed as commands, but are used in code comments to trigger memory 
 
 Setting up a new project:
 ```
-/memory init
-/memory update long_term/project_brief.md "Project description..."
+# Check memory system status
 /memory status
+
+# Request to see project brief
+/memory recall project_brief
+
+# Suggest updates to project brief
+/memory update long_term/project_brief.md "Project description..."
 ```
 
 Starting a new feature in THINK mode:
 ```
 # First, select THINK in UI dropdown
 /mode think
+
+# Explore authentication approaches
 /think explore "user authentication"
+
+# Save working decisions
 /memory save working_decisions.md
 ```
 
@@ -218,8 +245,14 @@ Moving to planning:
 ```
 # First, select PLAN in UI dropdown
 /mode plan
+
+# Create implementation plan
 /plan create "user authentication"
+
+# Update current context
 /memory update current_context.md "Planning user authentication..."
+
+# Mark plan as approved
 /plan approve
 ```
 
@@ -227,8 +260,14 @@ Starting implementation:
 ```
 # First, select IMPLEMENT in UI dropdown
 /mode implement
+
+# Start implementation
 /implement start "user authentication"
-/memory update progress.md "Started implementing user authentication..."
+
+# Report a code commit event
+/memory event commit "Implemented basic auth flow"
+
+# Record checkpoint
 /implement checkpoint
 ```
 
@@ -236,8 +275,14 @@ Reviewing implementation:
 ```
 # First, select REVIEW in UI dropdown
 /mode review
+
+# Review code file
 /review code "src/auth/login.ts"
-/memory save session_notes.md
+
+# Generate suggestions
+/review suggest
+
+# Mark as approved
 /review approve
 ```
 
@@ -245,9 +290,12 @@ Documenting completed work:
 ```
 # First, select DOCUMENT in UI dropdown
 /mode document
+
+# Update documentation
 /document update api-docs
-/memory promote working_decisions.md
-/document validate
+
+# Promote temporary documentation
+/document promote session_notes.md
 ```
 
 ### Advanced Examples
@@ -257,57 +305,32 @@ Complex search:
 /memory search -c architecture,patterns "authentication flow"
 ```
 
-Consolidating related memories:
+Reporting a build event:
 ```
-/memory consolidate "auth_flow.md,auth_api.md,auth_security.md" "authentication.md"
-```
-
-Configuring event notifications:
-```
-/memory config events.notification_level verbose
-/events enable gitOperations
-/events disable fileModification
+/memory event build_success "Authentication system passing all tests"
 ```
 
-Using annotations in code:
-```javascript
-// @memory:pattern This factory pattern should be used for all service initialization
-function createAuthService(config) {
-  // Implementation
-}
-
-// @memory:decision We're using JWT with asymmetric keys for auth
-const authType = 'jwt-asymmetric';
-
-// @memory:todo Need to implement refresh token flow
-function handleLogin() {
-  // Current implementation
-}
+Promoting short-term memory to long-term:
 ```
+/memory promote working_decisions.md -d decisions.md
+```
+
+## Best Practices for Using Commands
+
+1. **Use appropriate commands for each task**: Different commands are designed for different purposes
+2. **Follow the two-step mode switching process**: Select in UI, then confirm with `/mode`
+3. **Be specific when reporting events**: Include relevant details in event descriptions
+4. **Implement suggested updates**: When the AI suggests memory updates, add them
+5. **Use shortcuts for common operations**: Save time with command shortcuts
+6. **Add annotations in code**: Use `@memory` annotations for automatic update suggestions
+7. **Request help when needed**: Use the `-h` flag to get command help
 
 ## Troubleshooting Commands
 
 If commands aren't working as expected:
 
-1. Check command syntax:
-   ```
-   /memory help
-   /memory <command> -h
-   ```
-
-2. Verify memory system status:
-   ```
-   /memory status
-   /context status
-   ```
-
-3. Reload context if needed:
-   ```
-   /context refresh
-   ```
-
-4. Reset to default mode:
-   ```
-   # Select THINK in UI dropdown
-   /mode think
-   ```
+1. **Check command syntax**: Make sure you're using the correct format
+2. **Verify memory system initialization**: Run `/memory status` to check
+3. **Ensure the AI has context**: Open memory files when requested
+4. **Check mode alignment**: Some commands only make sense in certain modes
+5. **Be explicit**: When in doubt, provide more details in your command

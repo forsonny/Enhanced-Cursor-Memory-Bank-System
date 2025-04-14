@@ -127,6 +127,18 @@ After installation, you should configure the memory bank for your specific proje
    /memory update long_term/patterns.md "Your coding patterns and conventions..."
    ```
 
+## How the System Works with Cursor
+
+The Enhanced Memory Bank System is designed to work with Cursor's capabilities:
+
+1. **Rule files (.mdc)** tell the AI how to behave
+2. **The AI requests to see memory files** when it needs context
+3. **You report significant events** using commands
+4. **The AI suggests memory updates** based on your activities
+5. **You implement the suggested updates** to maintain persistent memory
+
+This approach ensures that context is maintained effectively while working within Cursor's actual capabilities.
+
 ## Troubleshooting
 
 ### Common Issues

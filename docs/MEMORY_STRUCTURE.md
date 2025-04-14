@@ -1,4 +1,4 @@
-# Memory Structure Documentation
+# Memory Structure Documentation (Updated)
 
 This document explains the memory file structure used by the Enhanced Memory Bank System, including the purpose and content of each file.
 
@@ -35,18 +35,9 @@ The Enhanced Memory Bank System organizes memory in a hierarchical structure:
     "last_updated": "",
     "memory_root": ".cursor/memory"
   },
-  "short_term": {
-    "enabled": true,
-    "retention": "7d",
-    "auto_cleanup": true,
-    "files": { ... }
-  },
-  "long_term": {
-    "enabled": true,
-    "auto_promote": true,
-    "files": { ... }
-  },
-  "auto_context": { ... },
+  "short_term": { ... },
+  "long_term": { ... },
+  "context_requests": { ... },
   "events": { ... },
   "commands": { ... },
   "modes": { ... }
@@ -57,8 +48,8 @@ Key configuration sections:
 - `system`: Core system parameters
 - `short_term`: Short-term memory configuration
 - `long_term`: Long-term memory configuration
-- `auto_context`: Automatic context loading settings
-- `events`: Event-triggered update configuration
+- `context_requests`: Context request settings
+- `events`: Event reporting configuration
 - `commands`: Command interface settings
 - `modes`: Operational mode settings
 
@@ -413,105 +404,26 @@ Long-term memory files store information that persists across development sessio
 
 **Usage**: Updated as development progresses; referenced when planning and reporting
 
-## Optional Specialized Memory Files
+## How the AI Works with Memory Files
 
-You can extend the memory system with additional specialized files:
+The AI interacts with memory files in these ways:
 
-### test_coverage.md
+1. **Requests Access**: The AI asks you to open specific files when it needs information
+   - "Could you please open project_brief.md so I can understand the project goals?"
 
-**Purpose**: Tracks test coverage and testing priorities
+2. **References Content**: The AI refers to information it's seen in memory files
+   - "According to the architecture.md file, we're using a microservice approach."
 
-**Structure**:
-```markdown
-# Test Coverage
+3. **Suggests Updates**: The AI provides formatted content to update memory files
+   - "Based on our discussion, here's content to add to decisions.md:"
 
-## Overall Status
-**Unit Test Coverage:** [percentage]
-**Integration Test Coverage:** [percentage]
-**E2E Test Coverage:** [percentage]
+4. **Context-Based Requests**: The AI requests different files based on context
+   - When working on TypeScript files, it may ask to see patterns.md for TypeScript patterns
+   - When implementing a feature, it may ask to see current_context.md for task details
 
-## Component Coverage
-
-### [Component 1]
-**Coverage:** [percentage]
-**Critical Areas:**
-- [Area 1]: [Coverage]
-- [Area 2]: [Coverage]
-**Gaps:**
-- [Gap 1]
-- [Gap 2]
-
-## Recent Test Improvements
-- [Improvement 1] - [Date]
-- [Improvement 2] - [Date]
-
-## Testing TODOs
-- [TODO 1]
-- [TODO 2]
-```
-
-### api.md
-
-**Purpose**: Documents API endpoints and usage
-
-**Structure**:
-```markdown
-# API Documentation
-
-## Endpoints
-
-### [Endpoint 1]
-**Path:** `[path]`
-**Method:** `[method]`
-**Description:** [description]
-**Request Parameters:**
-- `[param1]`: [description]
-- `[param2]`: [description]
-**Response:**
-```json
-[Example response]
-```
-
-## Authentication
-[Authentication mechanism details]
-
-## Error Handling
-[How API errors are handled and returned]
-```
-
-### database.md
-
-**Purpose**: Documents database schema and operations
-
-**Structure**:
-```markdown
-# Database Documentation
-
-## Schema
-
-### [Table/Collection 1]
-**Purpose:** [What this stores]
-**Fields:**
-- `[field1]`: [type] - [description]
-- `[field2]`: [type] - [description]
-**Indexes:**
-- [index1]
-- [index2]
-**Relationships:**
-- [relationship1]
-- [relationship2]
-
-## Migrations
-
-### [Migration 1]
-**Date:** [Date]
-**Description:** [What changed]
-**Reason:** [Why it changed]
-
-## Performance Considerations
-- [Consideration 1]
-- [Consideration 2]
-```
+5. **Mode-Specific Behavior**: The AI focuses on different memory files based on the current mode
+   - THINK mode prioritizes architecture.md and patterns.md
+   - IMPLEMENT mode prioritizes current_context.md and progress.md
 
 ## Memory Flow
 
@@ -541,7 +453,7 @@ You can extend the memory structure by:
 1. **Adding new memory files** in either short-term or long-term directories
 2. **Updating config.json** to include references to new files
 3. **Creating specialized files** for specific aspects of your project
-4. **Defining new memory relationships** through events and mode configurations
+4. **Defining new memory relationships** through event reporting
 
 When extending, maintain the hierarchy and update flow to ensure consistency.
 
@@ -554,3 +466,4 @@ When extending, maintain the hierarchy and update flow to ensure consistency.
 5. **Cleanup outdated information**: Archive or remove obsolete content
 6. **Cross-reference related content**: Link between memory files when appropriate
 7. **Maintain hierarchy**: Respect the short-term to long-term promotion flow
+8. **Open files when requested**: When the AI asks to see specific files, open them
