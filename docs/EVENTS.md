@@ -1,556 +1,379 @@
-# Memory Structure Documentation
+# Event System Documentation
 
-This document explains the memory file structure used by the Enhanced Memory Bank System, including the purpose and content of each file.
+This document explains the event-triggered memory update system in the Enhanced Memory Bank System.
 
-## Directory Structure
+## Overview
 
-The Enhanced Memory Bank System organizes memory in a hierarchical structure:
+The event system automatically updates memory files based on development activities without requiring explicit commands. It monitors for specific events and triggers appropriate memory updates.
 
-```
-.cursor/memory/
-├── config.json               # System configuration
-├── short_term/               # Session-specific memory
-│   ├── current_context.md    # Active development focus
-│   ├── working_decisions.md  # Temporary decisions
-│   └── session_notes.md      # Current session notes
-└── long_term/                # Persistent memory
-    ├── project_brief.md      # Core project definition
-    ├── architecture.md       # System architecture
-    ├── patterns.md           # Established patterns
-    ├── decisions.md          # Important project decisions
-    └── progress.md           # Development progress
-```
+## Event Types
 
-## Configuration File
+The system detects and responds to these event types:
 
-`.cursor/memory/config.json` controls the behavior of the memory system:
+### File Events
+
+| Event | Description | Memory Updates |
+|-------|-------------|----------------|
+| **File Creation** | New files added to the project | progress.md, current_context.md |
+| **File Modification** | Changes to existing files | current_context.md, progress.md |
+| **File Deletion** | Removal of project files | current_context.md, progress.md |
+
+### Build Events
+
+| Event | Description | Memory Updates |
+|-------|-------------|----------------|
+| **Successful Build** | Build completes successfully | progress.md, current_context.md |
+| **Failed Build** | Build fails | current_context.md, session_notes.md |
+
+### Test Events
+
+| Event | Description | Memory Updates |
+|-------|-------------|----------------|
+| **Successful Tests** | Tests pass | progress.md |
+| **Failed Tests** | Tests fail | current_context.md, session_notes.md |
+
+### Git Events
+
+| Event | Description | Memory Updates |
+|-------|-------------|----------------|
+| **Git Commit** | Code committed to repository | progress.md, current_context.md |
+| **Branch Change** | Switch between git branches | current_context.md |
+| **Merge Operation** | Merging between branches | current_context.md, progress.md |
+
+### Session Events
+
+| Event | Description | Memory Updates |
+|-------|-------------|----------------|
+| **Session Start** | Beginning of development session | current_context.md, session_notes.md |
+| **Session End** | End of development session | progress.md, session_notes.md |
+
+### Mode Events
+
+| Event | Description | Memory Updates |
+|-------|-------------|----------------|
+| **Mode Transition** | Switching between operational modes | Depends on specific transition |
+
+### User Annotation Events
+
+| Event | Description | Memory Updates |
+|-------|-------------|----------------|
+| **@memory:note** | User adds a note annotation | session_notes.md |
+| **@memory:decision** | User documents a decision | decisions.md |
+| **@memory:pattern** | User identifies a pattern | patterns.md |
+| **@memory:architecture** | User notes architecture detail | architecture.md |
+| **@memory:todo** | User flags a todo item | current_context.md |
+| **@memory:progress** | User records progress | progress.md |
+
+## Event Processing
+
+### Priority Order
+
+Events are processed in this priority order (high to low):
+
+1. Explicit commands (e.g., `/memory update`)
+2. User annotations (e.g., `// @memory:decision`)
+3. Mode transitions
+4. Git operations
+5. Build/test events
+6. File operations
+7. Session boundaries
+
+### Event Batching
+
+Similar events within a short timeframe are batched to prevent excessive updates:
+
+- Multiple file modifications are treated as a single logical change
+- Multiple test runs are consolidated into a single result
+- Related memory updates are combined for consistency
+
+### Conflict Resolution
+
+When events conflict, the system resolves them using these rules:
+
+- Explicit commands override automatic events
+- Later events override earlier ones in same priority level
+- User is prompted for resolution when automatic resolution fails
+
+### Threshold Filtering
+
+Events are filtered based on significance:
+
+- Minor file changes may not trigger updates
+- Frequent build attempts may be consolidated
+- Trivial git operations may be ignored
+
+## Configuration
+
+The event system is configured in `.cursor/memory/config.json`:
 
 ```json
 {
-  "system": {
-    "version": "1.0.0",
-    "initialized": true,
-    "current_mode": "THINK",
-    "complexity_level": 2,
-    "last_updated": "",
-    "memory_root": ".cursor/memory"
-  },
-  "short_term": {
+  "events": {
     "enabled": true,
-    "retention": "7d",
-    "auto_cleanup": true,
-    "files": { ... }
-  },
-  "long_term": {
-    "enabled": true,
-    "auto_promote": true,
-    "files": { ... }
-  },
-  "auto_context": { ... },
-  "events": { ... },
-  "commands": { ... },
-  "modes": { ... }
+    "notification_level": "standard",
+    "batch_window": "5s",
+    "fileCreation": {
+      "enabled": true,
+      "memoryUpdates": ["progress", "current_context"]
+    },
+    "fileModification": {
+      "enabled": true,
+      "threshold": "significant",
+      "memoryUpdates": ["current_context", "progress"]
+    },
+    "buildEvents": {
+      "enabled": true,
+      "failureUpdates": ["current_context", "session_notes"],
+      "successUpdates": ["progress"]
+    },
+    "testExecution": {
+      "enabled": true,
+      "failureUpdates": ["current_context", "session_notes"],
+      "successUpdates": ["progress"]
+    },
+    "gitOperations": {
+      "enabled": true,
+      "commitUpdates": ["progress"],
+      "branchUpdates": ["current_context"]
+    },
+    "sessionBoundaries": {
+      "enabled": true,
+      "startUpdates": ["current_context", "session_notes"],
+      "endUpdates": ["progress", "session_notes"]
+    },
+    "modeTransitions": {
+      "enabled": true,
+      "updates": {
+        "THINK": ["working_decisions", "session_notes"],
+        "PLAN": ["current_context", "working_decisions"],
+        "IMPLEMENT": ["progress", "current_context"],
+        "REVIEW": ["session_notes", "working_decisions"],
+        "DOCUMENT": ["progress", "decisions", "patterns", "architecture"]
+      }
+    },
+    "annotations": {
+      "enabled": true,
+      "patterns": {
+        "note": "session_notes.md",
+        "decision": "decisions.md",
+        "pattern": "patterns.md",
+        "architecture": "architecture.md",
+        "todo": "current_context.md",
+        "progress": "progress.md"
+      }
+    }
+  }
 }
 ```
 
-Key configuration sections:
-- `system`: Core system parameters
-- `short_term`: Short-term memory configuration
-- `long_term`: Long-term memory configuration
-- `auto_context`: Automatic context loading settings
-- `events`: Event-triggered update configuration
-- `commands`: Command interface settings
-- `modes`: Operational mode settings
+### Configuration Options
 
-## Short-Term Memory Files
+| Option | Description | Values |
+|--------|-------------|--------|
+| `enabled` | Master toggle for event system | `true`/`false` |
+| `notification_level` | How much feedback on events | `none`, `minimal`, `standard`, `verbose` |
+| `batch_window` | Time window for batching similar events | Time string (e.g., `5s`, `1m`) |
+| `<event_type>.enabled` | Enable/disable specific event type | `true`/`false` |
+| `<event_type>.memoryUpdates` | Which files to update for event | Array of memory file names |
+| `<event_type>.threshold` | Significance threshold for triggering | `any`, `minor`, `significant`, `major` |
 
-Short-term memory files store information that's primarily relevant to the current development session.
+## Notifications
 
-### current_context.md
+The system notifies users about memory updates with configurable detail levels:
 
-**Purpose**: Tracks what you're currently working on
+### Notification Levels
 
-**Structure**:
-```markdown
-# Current Context
+- `none`: No notifications
+- `minimal`: Essential updates only
+- `standard`: All significant updates
+- `verbose`: All updates with details
 
-## Active Task
-[Task description]
+### Notification Format
 
-## Background
-[Relevant background information]
-
-## Current Focus
-[What I'm working on right now]
-
-## Next Steps
-1. [Step 1]
-2. [Step 2]
-3. [Step 3]
-
-## Open Questions
-- [Question 1]
-- [Question 2]
-
-## Recent Changes
-- [Change 1] - [Timestamp]
-- [Change 2] - [Timestamp]
-
-## Mode: [CURRENT_MODE]
-
-Last Updated: [TIMESTAMP]
+```
+MEMORY UPDATE: progress.md
+TRIGGER: Successful build
+CHANGES: Added milestone "Authentication API completed"
 ```
 
-**Usage**: Updated whenever your focus changes or when switching between tasks
+## Using Annotations
 
-### working_decisions.md
+Code annotations allow direct memory updates from code comments:
 
-**Purpose**: Documents decisions being considered but not yet finalized
+### Syntax
 
-**Structure**:
-```markdown
-# Working Decisions
-
-## Under Consideration
-
-### [Decision Topic 1]
-
-**Options:**
-- Option A: [Description]
-  - Pros: [List pros]
-  - Cons: [List cons]
-- Option B: [Description]
-  - Pros: [List pros]
-  - Cons: [List cons]
-
-**Current Thinking:** [Preliminary decision direction]
-
-## Recently Decided
-
-### [Decision 1]
-
-**Decision:** [What was decided]
-**Rationale:** [Why this decision was made]
-**Date:** [When decided]
-**Status:** [Implemented/Pending Implementation]
+```
+// @memory:<type> <content>
 ```
 
-**Usage**: Updated during exploration and planning phases; decisions may be promoted to long-term memory when finalized
+For example:
 
-### session_notes.md
+```javascript
+// @memory:note This approach handles edge cases better
+function handleEdgeCases() {
+  // Implementation
+}
 
-**Purpose**: Captures notes, discoveries, and thoughts from the current session
+// @memory:decision We're using JWT for authentication
+const authType = 'jwt';
 
-**Structure**:
-```markdown
-# Session Notes
+// @memory:pattern This pattern for API routing should be followed
+router.get('/api/:resource', authMiddleware, (req, res) => {
+  // Implementation
+});
 
-## Session: [DATE] - [START TIME]
+// @memory:architecture This service handles payment processing
+class PaymentService {
+  // Implementation
+}
 
-### Goals
-- [Goal 1]
-- [Goal 2]
+// @memory:todo Refactor this component to use the new pattern
+function legacyComponent() {
+  // Implementation
+}
 
-### Notes
-- [Note 1]
-- [Note 2]
-
-### Discoveries
-- [Discovery 1]
-- [Discovery 2]
-
-### Blockers
-- [Blocker 1]
-- [Blocker 2]
-
-### Next Session Plan
-- [Plan 1]
-- [Plan 2]
-
-Session End: [END TIME]
-Total Duration: [DURATION]
+// @memory:progress Completed user authentication flow
+function authenticationFlow() {
+  // Implementation
+}
 ```
 
-**Usage**: Updated throughout a development session; important notes may be promoted to long-term memory
-
-## Long-Term Memory Files
-
-Long-term memory files store information that persists across development sessions.
-
-### project_brief.md
-
-**Purpose**: Defines the core project requirements and goals
-
-**Structure**:
-```markdown
-# Project Brief
-
-## Overview
-[Project description]
-
-## Goals
-- [Goal 1]
-- [Goal 2]
-
-## Requirements
-- [Requirement 1]
-- [Requirement 2]
-
-## Constraints
-- [Constraint 1]
-- [Constraint 2]
-
-## Stakeholders
-- [Stakeholder 1]
-- [Stakeholder 2]
-
-## Timeline
-- Start: [Start Date]
-- Milestones:
-  - [Milestone 1]: [Date]
-  - [Milestone 2]: [Date]
-- Target Completion: [End Date]
-
-## Success Criteria
-- [Criterion 1]
-- [Criterion 2]
-```
-
-**Usage**: Updated when project requirements or goals change; referenced when making significant decisions
-
-### architecture.md
-
-**Purpose**: Documents the system architecture and component relationships
-
-**Structure**:
-```markdown
-# System Architecture
-
-## Overview
-[High-level architecture description]
-
-## Components
-
-### [Component 1]
-**Purpose:** [What this component does]
-**Responsibilities:**
-- [Responsibility 1]
-- [Responsibility 2]
-
-### [Component 2]
-**Purpose:** [What this component does]
-**Responsibilities:**
-- [Responsibility 1]
-- [Responsibility 2]
-
-## Data Flow
-[Describe how data flows through the system]
-
-## Technologies
-- [Technology 1]: [Purpose/Usage]
-- [Technology 2]: [Purpose/Usage]
-
-## Interfaces
-
-### [Interface 1]
-**Between:** [Component A] and [Component B]
-**Protocol:** [Protocol]
-**Data:** [Data exchanged]
-
-## Deployment Architecture
-[Describe how the system is deployed]
-
-## Security Considerations
-[Describe security architecture]
-```
-
-**Usage**: Updated when the system architecture changes; referenced during design and implementation
-
-### patterns.md
-
-**Purpose**: Records established coding patterns and conventions
-
-**Structure**:
-```markdown
-# Patterns & Conventions
-
-## Coding Standards
-
-### Naming Conventions
-- [Convention 1]
-- [Convention 2]
-
-### Structure Patterns
-- [Pattern 1]
-- [Pattern 2]
-
-### Error Handling
-- [Approach 1]
-- [Approach 2]
-
-## Design Patterns
-
-### [Pattern Category 1]
-
-#### [Pattern 1]
-**Usage:** [When to use]
-**Implementation:** [How to implement]
-**Example:**
-```[language]
-[Code example]
-```
-
-## Anti-patterns
-
-### [Anti-pattern 1]
-**Problem:** [Description]
-**Solution:** [Better approach]
-```
-
-**Usage**: Updated when new patterns emerge; referenced during implementation and code review
-
-### decisions.md
-
-**Purpose**: Records important project decisions
-
-**Structure**:
-```markdown
-# Project Decisions
-
-## Architecture Decisions
-
-### [Decision 1]
-**Decision:** [What was decided]
-**Date:** [When decided]
-**Status:** [Implemented/In Progress/Planned]
-**Context:** [Background and context]
-**Options Considered:**
-- [Option 1]: [Description]
-- [Option 2]: [Description]
-**Decision Rationale:** [Why this option was chosen]
-**Consequences:**
-- [Consequence 1]
-- [Consequence 2]
-
-## Implementation Decisions
-
-### [Decision 1]
-**Decision:** [What was decided]
-**Date:** [When decided]
-**Status:** [Implemented/In Progress/Planned]
-**Context:** [Background and context]
-**Options Considered:**
-- [Option 1]: [Description]
-- [Option 2]: [Description]
-**Decision Rationale:** [Why this option was chosen]
-**Consequences:**
-- [Consequence 1]
-- [Consequence 2]
-
-## Technology Decisions
-
-### [Decision 1]
-**Decision:** [What was decided]
-**Date:** [When decided]
-**Status:** [Implemented/In Progress/Planned]
-**Context:** [Background and context]
-**Options Considered:**
-- [Option 1]: [Description]
-- [Option 2]: [Description]
-**Decision Rationale:** [Why this option was chosen]
-**Consequences:**
-- [Consequence 1]
-- [Consequence 2]
-```
-
-**Usage**: Updated when significant decisions are made; referenced when making related decisions
-
-### progress.md
-
-**Purpose**: Tracks development progress and milestones
-
-**Structure**:
-```markdown
-# Project Progress
-
-## Current Status
-**Overall Progress:** [percentage]
-**Current Phase:** [phase]
-**Active Areas:** [areas]
-
-## Completed Items
-
-### [Feature/Component 1]
-**Completed:** [Date]
-**Description:** [What was completed]
-**Notes:** [Any relevant notes]
-
-## In Progress
-
-### [Feature/Component 1]
-**Started:** [Date]
-**Estimated Completion:** [Date]
-**Progress:** [percentage]
-**Current Focus:** [What's being worked on]
-**Blockers:** [Any blockers]
-
-## Planned Items
-
-### [Feature/Component 1]
-**Priority:** [High/Medium/Low]
-**Estimated Start:** [Date]
-**Estimated Effort:** [Effort]
-**Dependencies:** [Any dependencies]
-
-## Milestone Tracking
-
-### [Milestone 1]
-**Target Date:** [Date]
-**Current Status:** [On Track/At Risk/Delayed]
-**Completion:** [percentage]
-**Notes:** [Any notes]
-```
-
-**Usage**: Updated as development progresses; referenced when planning and reporting
-
-## Optional Specialized Memory Files
-
-You can extend the memory system with additional specialized files:
-
-### test_coverage.md
-
-**Purpose**: Tracks test coverage and testing priorities
-
-**Structure**:
-```markdown
-# Test Coverage
-
-## Overall Status
-**Unit Test Coverage:** [percentage]
-**Integration Test Coverage:** [percentage]
-**E2E Test Coverage:** [percentage]
-
-## Component Coverage
-
-### [Component 1]
-**Coverage:** [percentage]
-**Critical Areas:**
-- [Area 1]: [Coverage]
-- [Area 2]: [Coverage]
-**Gaps:**
-- [Gap 1]
-- [Gap 2]
-
-## Recent Test Improvements
-- [Improvement 1] - [Date]
-- [Improvement 2] - [Date]
-
-## Testing TODOs
-- [TODO 1]
-- [TODO 2]
-```
-
-### api.md
-
-**Purpose**: Documents API endpoints and usage
-
-**Structure**:
-```markdown
-# API Documentation
-
-## Endpoints
-
-### [Endpoint 1]
-**Path:** `[path]`
-**Method:** `[method]`
-**Description:** [description]
-**Request Parameters:**
-- `[param1]`: [description]
-- `[param2]`: [description]
-**Response:**
-```json
-[Example response]
-```
-
-## Authentication
-[Authentication mechanism details]
-
-## Error Handling
-[How API errors are handled and returned]
-```
-
-### database.md
-
-**Purpose**: Documents database schema and operations
-
-**Structure**:
-```markdown
-# Database Documentation
-
-## Schema
-
-### [Table/Collection 1]
-**Purpose:** [What this stores]
-**Fields:**
-- `[field1]`: [type] - [description]
-- `[field2]`: [type] - [description]
-**Indexes:**
-- [index1]
-- [index2]
-**Relationships:**
-- [relationship1]
-- [relationship2]
-
-## Migrations
-
-### [Migration 1]
-**Date:** [Date]
-**Description:** [What changed]
-**Reason:** [Why it changed]
-
-## Performance Considerations
-- [Consideration 1]
-- [Consideration 2]
-```
-
-## Memory Flow
-
-The memory system follows these information flow patterns:
-
-1. **Short-Term to Long-Term**:
-   - Working decisions → Decisions
-   - Session notes → Various long-term files
-   - Current context → Progress
-
-2. **Event-Based Updates**:
-   - File creation → Progress, Current context
-   - Git operations → Progress, Current context
-   - Build events → Progress, Session notes
-
-3. **Mode-Specific Focus**:
-   - THINK mode → Working decisions, Session notes
-   - PLAN mode → Current context, Working decisions
-   - IMPLEMENT mode → Progress, Current context
-   - REVIEW mode → Session notes, Working decisions
-   - DOCUMENT mode → All long-term memory
-
-## Extending Memory Structure
-
-You can extend the memory structure by:
-
-1. **Adding new memory files** in either short-term or long-term directories
-2. **Updating config.json** to include references to new files
-3. **Creating specialized files** for specific aspects of your project
-4. **Defining new memory relationships** through events and mode configurations
-
-When extending, maintain the hierarchy and update flow to ensure consistency.
+### Available Annotation Types
+
+| Annotation | Target File | Purpose |
+|------------|-------------|---------|
+| `@memory:note` | session_notes.md | Record observations and findings |
+| `@memory:decision` | decisions.md | Document important decisions |
+| `@memory:pattern` | patterns.md | Establish coding patterns |
+| `@memory:architecture` | architecture.md | Document architectural details |
+| `@memory:todo` | current_context.md | Track development tasks |
+| `@memory:progress` | progress.md | Record development progress |
+
+## Manual Event Control
+
+The event system can be manually controlled with these commands:
+
+| Command | Purpose | Example |
+|---------|---------|---------|
+| `/events status` | Check event system status | `/events status` |
+| `/events enable <type>` | Enable specific event type | `/events enable fileCreation` |
+| `/events disable <type>` | Disable specific event type | `/events disable buildEvents` |
+| `/events trigger <type>` | Manually trigger event processing | `/events trigger gitOperations` |
+| `/events config <key> <value>` | Configure event system | `/events config notification_level verbose` |
+
+## Event Logs
+
+The system maintains an event log in `.cursor/memory/event_log.json` that tracks:
+
+- Event type and timestamp
+- Trigger source
+- Affected memory files
+- Changes made
+- Batching information
+
+This log can be used to audit and debug memory changes.
+
+## Mode-Specific Event Behavior
+
+Different operational modes influence how events are processed:
+
+| Mode | Event Handling |
+|------|----------------|
+| **THINK** | Emphasizes research findings and exploration notes |
+| **PLAN** | Focuses on task breakdown and implementation plans |
+| **IMPLEMENT** | Prioritizes progress updates and implementation details |
+| **REVIEW** | Highlights improvement suggestions and issue tracking |
+| **DOCUMENT** | Balances updates across all long-term memory files |
 
 ## Best Practices
 
-1. **Keep files focused**: Each memory file should have a clear purpose
-2. **Follow established formats**: Maintain consistent structure across memory files
-3. **Date and timestamp entries**: Include timestamps for all updates
-4. **Regular consolidation**: Periodically merge related information
-5. **Cleanup outdated information**: Archive or remove obsolete content
-6. **Cross-reference related content**: Link between memory files when appropriate
-7. **Maintain hierarchy**: Respect the short-term to long-term promotion flow
+1. **Enable relevant events only**: Turn off events you don't need
+2. **Use annotations liberally**: They're the most direct way to update memory
+3. **Set appropriate thresholds**: Tune significance thresholds to avoid noise
+4. **Review event logs periodically**: Look for patterns or missed updates
+5. **Adjust notification levels**: Use verbose during setup, standard for daily use
+6. **Create custom event mappings**: Configure which files update for each event
+
+## Advanced Configuration
+
+### Custom Event Types
+
+You can define custom event types in the configuration:
+
+```json
+"customEvents": {
+  "deploymentEvents": {
+    "enabled": true,
+    "memoryUpdates": ["progress", "architecture"],
+    "triggers": ["*deploy*", "*release*"]
+  }
+}
+```
+
+### Event Filters
+
+Filter events based on file patterns:
+
+```json
+"fileModification": {
+  "enabled": true,
+  "filters": {
+    "include": ["src/**/*.ts", "src/**/*.tsx"],
+    "exclude": ["**/*.test.ts", "**/*.spec.ts"]
+  },
+  "memoryUpdates": ["current_context", "progress"]
+}
+```
+
+### Complex Update Rules
+
+Define complex rules for updates:
+
+```json
+"gitOperations": {
+  "enabled": true,
+  "rules": [
+    {
+      "condition": "commit.message.includes('fix')",
+      "updates": ["progress.md:bugs", "current_context.md:fixes"]
+    },
+    {
+      "condition": "commit.message.includes('feat')",
+      "updates": ["progress.md:features", "current_context.md:new_features"]
+    }
+  ]
+}
+```
+
+## Troubleshooting Events
+
+### Common Issues
+
+1. **Events not triggering**:
+   - Check if event type is enabled in config
+   - Verify the significance threshold isn't too high
+   - Ensure memory files exist
+
+2. **Too many updates**:
+   - Increase significance threshold
+   - Adjust batch window duration
+   - Disable event types you don't need
+
+3. **Updates going to wrong files**:
+   - Check memoryUpdates configuration
+   - Verify annotation type matches intended target
+
+4. **Annotation not working**:
+   - Ensure syntax is correct (// @memory:type content)
+   - Check that annotations are enabled in config
+   - Verify target memory file exists
+
+### Resetting Event System
+
+If the event system becomes misconfigured:
+
+```
+/events config reset
+```
+
+This resets event configuration to defaults without losing memory content.
