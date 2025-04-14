@@ -14,27 +14,10 @@ mkdir -p .cursor/rules
 mkdir -p .cursor/memory/short_term
 mkdir -p .cursor/memory/long_term
 
-# Function to create a file with content
-create_file() {
-  local filepath=$1
-  local content=$2
-  
-  echo "Creating $filepath..."
-  mkdir -p "$(dirname "$filepath")"
-  cat > "$filepath" << 'FILECONTENT'
-$content
-FILECONTENT
-  
-  # Replace the placeholder with the actual content
-  sed -i.bak "s/\$content/$content/" "$filepath" 2>/dev/null || sed -i "s/\$content/$content/" "$filepath"
-  rm -f "$filepath.bak" 2>/dev/null || true
-  
-  echo "✓ Created $filepath"
-}
+# Create rule files
+echo "Creating Cursor rule files..."
 
-echo "Creating rule files..."
-
-# Create 001_memory_core.mdc
+# 001_memory_core.mdc
 cat > .cursor/rules/001_memory_core.mdc << 'EOF'
 ---
 description: Core memory system that provides short-term and long-term memory capabilities for AI interactions
@@ -44,6 +27,22 @@ globs: alwaysApply: true
 # Memory Core System
 
 This rule establishes the foundation of the Enhanced Memory Bank System for Cursor. It enables the AI to maintain context across sessions through structured documentation.
+
+## Configuration Loading
+
+When starting work with a project, I MUST:
+
+1. Check for the existence of `.cursor/memory/config.json`
+2. If it exists, load and parse its content
+3. Follow all settings defined in the configuration file
+4. If it doesn't exist, use default settings
+
+The configuration file contains critical settings that control:
+- Memory retention periods
+- Automatic loading behavior
+- Event trigger definitions
+- Mode-specific behaviors
+- Memory file locations
 
 ## Memory System Architecture
 
@@ -57,18 +56,21 @@ The memory system functions on two distinct levels:
 I follow these principles when working with the memory system:
 
 - **Documentation First**: Every significant decision, pattern, or insight is documented
-- **Memory Refresh**: I always load relevant memory before starting work
-- **Consistent Updates**: Memory is updated after meaningful changes
+- **Memory Refresh**: I always load relevant memory when asked or when context requires
+- **Consistent Updates**: Memory is updated when the user reports meaningful changes
 - **Memory Hierarchy**: Information flows from short-term to long-term when appropriate
 - **Single Source of Truth**: Memory files are the canonical reference for project understanding
 
 ## Memory Access Protocol
 
-When I begin work, I MUST check for the existence of memory structures and load relevant context:
+When I begin work, I will check for the existence of memory structures:
 
-1. Review project_brief.md to understand core project requirements
-2. Check current_context.md to understand the active development focus
-3. Review relevant memory files based on the current task
+1. Look for `.cursor/memory/config.json` to load configuration
+2. Ask to review `.cursor/memory/long_term/project_brief.md` to understand core project requirements
+3. Ask to check `.cursor/memory/short_term/current_context.md` to understand the active development focus
+4. Request access to relevant memory files based on the current task
+
+If memory files don't exist, I will suggest creating them using the initialization script.
 
 ## Memory Storage Structure
 
@@ -76,6 +78,7 @@ The memory system is organized as follows:
 
 ```
 .cursor/memory/
+├── config.json
 ├── short_term/
 │   ├── current_context.md     # What I'm currently working on
 │   ├── working_decisions.md   # Temporary decisions being considered
@@ -88,13 +91,29 @@ The memory system is organized as follows:
     └── progress.md            # Development progress tracking
 ```
 
+## Cursor Integration
+
+Since I'm operating within Cursor, I have these file-related capabilities:
+
+1. I can READ files that are open in the editor or explicitly loaded
+2. I can SUGGEST changes to files which users can implement
+3. I can REQUEST users to open specific files for context
+4. I cannot directly write to files without user intervention
+5. I cannot automatically detect file system events
+
+When the memory commands suggest file operations, I will:
+1. Provide clear instructions for what should be updated
+2. Suggest the exact content that should be added/modified
+3. Ask the user to confirm before making changes
+4. Acknowledge when changes have been made
+
 ## Memory Initialization Checklist
 
-When the memory system is first initialized in a project, I will:
+When the memory system is first initialized in a project, I will guide the user to:
 
-1. Create the memory directory structure if it doesn't exist
+1. Run the initialization script to create the memory directory structure
 2. Create initial versions of core memory files with appropriate templates
-3. Prompt for essential project information to populate project_brief.md
+3. Input essential project information to populate project_brief.md
 4. Set up initial patterns and conventions in patterns.md
 5. Initialize progress.md with baseline project state
 
@@ -102,15 +121,15 @@ When the memory system is first initialized in a project, I will:
 
 I maintain memory with these responsibilities:
 
-- Ensure memory files remain accurate and up-to-date
+- Help users keep memory files accurate and up-to-date
 - Detect and resolve conflicts between memory files
 - Suggest memory consolidation when related information is fragmented
 - Maintain appropriate distinctions between short-term and long-term memory
-- Regularly update progress.md to reflect project development
+- Help users maintain progress.md to reflect project development
 
 ## Memory System Variables
 
-The memory system tracks these key variables:
+The memory system tracks these key variables in the config file:
 
 - MEMORY_INITIALIZED: Whether memory has been fully initialized
 - CURRENT_MODE: The active operational mode (Think/Plan/Implement/Review)
@@ -120,7 +139,7 @@ The memory system tracks these key variables:
 
 ## Memory Status Assessment
 
-I can assess the overall health of the memory system with checks for:
+I can help assess the overall health of the memory system by checking:
 
 - Memory coverage of project components
 - Recency of memory updates
@@ -129,7 +148,7 @@ I can assess the overall health of the memory system with checks for:
 - Accurate reflection of project state in progress.md
 EOF
 
-# Create 002_memory_commands.mdc
+# 002_memory_commands.mdc
 cat > .cursor/rules/002_memory_commands.mdc << 'EOF'
 ---
 description: Defines commands for manual memory operations in the Enhanced Memory Bank system
@@ -138,7 +157,7 @@ globs: alwaysApply: true
 
 # Memory Commands
 
-This rule defines the command interface for directly interacting with the memory system. These commands provide explicit control over memory operations.
+This rule defines the command interface for directly interacting with the memory system. These commands provide explicit control over memory operations, adapted for Cursor's environment.
 
 ## Command Syntax
 
@@ -153,50 +172,80 @@ All memory commands use the `/memory` prefix followed by the specific operation:
 ### Core Commands
 
 - `/memory init` - Initialize the memory system for a new project
+  - Checks if memory files and structure exist
+  - Provides instructions for creating necessary files if they don't exist
+  - Guides through initial setup process
+
 - `/memory status` - Display current memory system status
+  - Shows configuration information
+  - Lists available memory files
+  - Reports current mode
+  - Indicates initialization status
+
 - `/memory help` - Show available memory commands and usage
+  - Displays command list with descriptions
+  - Provides examples of common usage
 
 ### Memory Management
 
 - `/memory save <context>` - Save current information to specified memory context
   - Example: `/memory save architecture` to update architecture memory
-  - Optional: Add `-t` flag for temporary (short-term) storage
+  - Options: Add `-t` flag for temporary (short-term) storage
+  - Implementation: Provides text for the user to add to the specified memory file
 
 - `/memory recall <context>` - Retrieve information from specified memory context
   - Example: `/memory recall patterns` to view established patterns
-  - Optional: Add `-v` flag for verbose output with metadata
+  - Options: Add `-v` flag for verbose output with metadata
+  - Implementation: Requests user to open specified file and then reads its content
 
 - `/memory update <file> <content>` - Update specific memory file
   - Example: `/memory update decisions.md "Decision: We will use TypeScript for all new code"`
-  - Supports inline content or file paths
+  - Implementation: Provides formatted text for the user to add to the specified file
 
 - `/memory search <query>` - Search across memory for relevant information
   - Example: `/memory search authentication`
-  - Optional: Add `-c <context>` to limit search to specific memory context
+  - Options: Add `-c <context>` to limit search to specific memory context
+  - Implementation: Requests user to open relevant files, then searches their content
 
 ### Memory Organization
 
 - `/memory promote <source>` - Promote short-term memory to long-term
   - Example: `/memory promote working_decisions.md`
-  - Optional: Add `-d <destination>` to specify target file
+  - Options: Add `-d <destination>` to specify target file
+  - Implementation: Suggests content to move from short-term to long-term memory
 
 - `/memory archive <file>` - Archive memory that's no longer actively relevant
   - Example: `/memory archive old_patterns.md`
-  - Moves to .cursor/memory/archive/ with timestamp
+  - Implementation: Provides instructions for moving file to archive location
 
 - `/memory consolidate <files>` - Combine related memories into a cohesive document
   - Example: `/memory consolidate auth_*.md authentication.md`
-  - Creates new consolidated file with references to sources
+  - Implementation: Requests access to source files, then provides consolidated content
 
 ### Configuration
 
 - `/memory config <key> <value>` - Update memory system configuration
   - Example: `/memory config short_term.retention 7d`
-  - Updates .cursor/memory/config.json
+  - Implementation: Provides the JSON to update in config.json
 
 - `/memory toggle <feature>` - Enable/disable specific memory features
   - Example: `/memory toggle auto_recall`
-  - Supports multiple features in comma-separated list
+  - Implementation: Provides the configuration change to implement
+
+## Command Execution Protocol
+
+Due to Cursor's environment, memory commands follow this execution protocol:
+
+1. **Command Parsing**: I interpret the command and its arguments
+2. **File Access Request**: If needed, I request access to required files
+   - "To process this command, I need to see the content of [file]. Can you open it?"
+3. **Operation Planning**: I determine what changes are needed
+4. **User Confirmation**: I describe the proposed changes and ask for confirmation
+   - "I'll update [file] by adding [content]. Would you like me to proceed?"
+5. **Implementation Guidance**: I provide specific instructions for implementation
+   - "Please add the following content to [file]:"
+6. **Operation Verification**: I confirm when the operation is complete
+   - "The memory has been successfully updated."
 
 ## Command Response Format
 
@@ -204,27 +253,10 @@ When a memory command is executed, the response follows this format:
 
 ```
 MEMORY COMMAND: <command>
-STATUS: <success|failure>
+STATUS: <success|planning|failure>
 DETAILS: <relevant details about operation>
+ACTION NEEDED: <what the user needs to do>
 NEXT STEPS: <suggested follow-up actions>
-```
-
-## Command Persistence
-
-Memory commands are recorded in a command history file (.cursor/memory/command_history.json) that tracks:
-
-- Command executed
-- Timestamp
-- Status code
-- Affected memory files
-- User notes (if provided)
-
-## Command Chaining
-
-Commands can be chained using the `&&` operator:
-
-```
-/memory recall architecture && /memory update architecture.md "Updated architecture"
 ```
 
 ## Command Shortcuts
@@ -262,9 +294,25 @@ EXAMPLES:
   /memory save patterns -t
   /memory save decisions -m "Updated authentication approach"
 ```
+
+## User-Driven Events
+
+Since automatic event detection isn't possible, memory commands also support user-driven event reporting:
+
+- `/memory event <type> <details>` - Report a development event
+  - Example: `/memory event commit "Implemented user authentication"`
+  - Implementation: Updates appropriate memory files based on event type
+
+Common event types:
+- `commit` - Code committed to repository
+- `build` - Build completed (success/failure)
+- `test` - Tests run (success/failure)
+- `create` - New file created
+- `modification` - File modified
+- `branch` - Git branch changed
 EOF
 
-# Create 003_mode_definitions.mdc
+# 003_mode_definitions.mdc
 cat > .cursor/rules/003_mode_definitions.mdc << 'EOF'
 ---
 description: Defines operational modes with specialized memory behaviors
@@ -288,7 +336,7 @@ Mode switching requires two steps:
 
 Example: Select "THINK" in the UI dropdown, then type `/mode think` to confirm
 
-The AI will verify you're in the correct mode before proceeding.
+I will verify you're in the correct mode before proceeding.
 
 ## Mode Overview
 
@@ -316,10 +364,9 @@ graph TD
 Purpose: Explore problems, research solutions, and understand requirements before implementation.
 
 Memory Behavior:
-- Prioritizes loading architecture.md and patterns.md
-- Creates temporary solution exploration documents
-- Updates working_decisions.md with pros/cons of approaches
-- Records research findings in session_notes.md
+- Requests access to architecture.md and patterns.md
+- Suggests updating working_decisions.md with pros/cons of approaches
+- Helps record research findings in session_notes.md
 - Does not modify production code
 
 Commands:
@@ -336,11 +383,11 @@ Memory Files:
 Purpose: Develop detailed implementation plans without making code changes.
 
 Memory Behavior:
-- Creates structured implementation plans
-- Updates current_context.md with task breakdown
-- Adds implementation details to working_decisions.md
+- Requests access to current_context.md and patterns.md
+- Helps create structured implementation plans
+- Suggests updates to current_context.md with task breakdown
 - Validates plans against patterns.md and architecture.md
-- Records planning decisions in decisions.md when finalized
+- Helps record planning decisions in decisions.md when finalized
 
 Commands:
 - `/plan create <feature>` - Create plan for implementing feature
@@ -357,11 +404,11 @@ Memory Files:
 Purpose: Execute plans and implement code changes according to defined approaches.
 
 Memory Behavior:
-- References current_context.md for task details
-- Updates progress.md with implementation status
-- Records implementation decisions in decisions.md
-- Updates patterns.md when new patterns emerge
-- May update architecture.md for significant structural changes
+- Requests access to current_context.md for task details
+- Suggests updates to progress.md with implementation status
+- Helps record implementation decisions in decisions.md
+- Suggests updates to patterns.md when new patterns emerge
+- May suggest updates to architecture.md for significant structural changes
 
 Commands:
 - `/implement start <task>` - Begin implementation of specific task
@@ -378,9 +425,9 @@ Memory Files:
 Purpose: Analyze existing code and suggest improvements.
 
 Memory Behavior:
-- Checks implementation against patterns.md
-- Creates review notes in session_notes.md
-- Updates working_decisions.md with improvement suggestions
+- Requests access to patterns.md to compare implementation
+- Helps create review notes in session_notes.md
+- Suggests improvements in working_decisions.md
 - References architecture.md to ensure architectural alignment
 - May suggest updates to patterns.md based on code quality findings
 
@@ -399,10 +446,11 @@ Memory Files:
 Purpose: Create and update documentation.
 
 Memory Behavior:
-- Updates long-term memory files with implementation details
-- Consolidates related short-term memories into long-term
+- Requests access to all relevant memory files
+- Helps update long-term memory files with implementation details
+- Suggests consolidating related short-term memories into long-term
 - Ensures consistency between memory files
-- Promotes temporary decisions to permanent records
+- Helps promote temporary decisions to permanent records
 - Maintains project progress history
 
 Commands:
@@ -417,9 +465,9 @@ Memory Files:
 
 ## Mode-Specific Memory Protocols
 
-### Automatic Memory Loading
+### Memory Loading Requests
 
-When switching modes, memory files are automatically loaded:
+When switching modes, I will request access to these key files:
 
 ```
 THINK: project_brief.md, architecture.md, patterns.md
@@ -429,9 +477,9 @@ REVIEW: patterns.md, architecture.md, progress.md
 DOCUMENT: All relevant memory files
 ```
 
-### Memory Update Triggers
+### Memory Update Suggestions
 
-Each mode has specific events that trigger memory updates:
+Each mode has specific events that should trigger memory updates:
 
 ```
 THINK: New approach identified, Research finding, Decision framework established
@@ -441,33 +489,58 @@ REVIEW: Issue found, Improvement identified, Review completed
 DOCUMENT: Documentation updated, Memory consolidated, Diagram created
 ```
 
-## Mode Persistence
+I will suggest appropriate memory updates when these events occur.
 
-The current active mode is stored in `.cursor/memory/config.json` under `system.current_mode`. Mode history is tracked in `.cursor/memory/mode_history.json`.
+## Memory Access Interactions
+
+Since I cannot directly access or modify files without user intervention, I will:
+
+1. **Request Access**: Ask the user to open specific memory files when needed
+   - "To help with this task, could you please open the current_context.md file?"
+
+2. **Suggest Updates**: Provide clear update suggestions for memory files
+   - "Based on our discussion, I suggest updating the patterns.md file with this new pattern..."
+
+3. **Provide Content**: Offer formatted content that can be added to memory files
+   - "Here's the content you can add to the progress.md file:"
+
+4. **Confirm Changes**: Ask for confirmation when memory has been updated
+   - "Have you updated the file? Let me know when it's ready."
+
+## Mode Verification
+
+I will verify that operations align with the current mode:
+
+1. Confirm the user has selected the appropriate mode in the UI
+2. Check that requests match the current operational mode
+3. Suggest mode switches when activities don't align with the current mode
+4. Request confirmation before proceeding with mode-specific operations
+
+This ensures that memory operations are consistent with the intended development phase.
 EOF
 
-# Create 004_auto_context.mdc
+# 004_auto_context.mdc
 cat > .cursor/rules/004_auto_context.mdc << 'EOF'
 ---
-description: Rules for automatically loading relevant memory context based on file types, locations, and current activity
+description: Rules for requesting relevant memory context based on file types, locations, and current activity
 globs: **/*.*
 ---
 
-# Automatic Context Loading
+# Context Loading System
 
-This rule defines when and how memory files are automatically loaded into the AI's context based on file types, locations, current activity, and project complexity.
+This rule defines how I should request and load relevant memory files into my context based on file types, locations, current activity, and project complexity.
 
 ## Context Loading Principles
 
-- Load only the most relevant context to avoid overwhelming the AI
+- Request access to the most relevant memory files for the current task
 - Prioritize recently updated memory files over older ones
 - Include both short-term and long-term memory as appropriate
-- Adapt context loading based on current operational mode
+- Adapt context requests based on current operational mode
 - Scale context depth with project complexity
 
 ## File Type Associations
 
-Different file types trigger loading of specific memory contexts:
+When working with specific file types, I should request access to these memory contexts:
 
 ```
 *.ts, *.tsx, *.js, *.jsx → patterns.md (TypeScript/JavaScript patterns)
@@ -490,7 +563,7 @@ Different file types trigger loading of specific memory contexts:
 
 ## Location-Based Context
 
-The file's location in the project structure determines additional context loading:
+The file's location in the project structure indicates I should request these additional contexts:
 
 ```
 / (root) → project_brief.md
@@ -512,309 +585,316 @@ The file's location in the project structure determines additional context loadi
 
 ## Activity-Based Context
 
-Recent user activity influences which memory files are loaded:
+Recent user activity suggests I should request these memory files:
 
 ```
-Recently edited test files → testing.md
-Recently ran build commands → build.md
-Recently viewed documentation → documentation.md
-Recently modified API endpoints → api.md
-Recently accessed database files → database.md
-Recently changed configuration → configuration.md
-Recently edited UI components → ui.md
+Recently discussed test files → testing.md
+Recently discussed build commands → build.md
+Recently discussed documentation → documentation.md
+Recently discussed API endpoints → api.md
+Recently discussed database files → database.md
+Recently discussed configuration → configuration.md
+Recently discussed UI components → ui.md
 ```
 
-## Mode-Based Context Overrides
+## Mode-Based Context Requests
 
-The current operational mode overrides default context loading behavior:
+The current operational mode determines which memory files I should prioritize requesting:
 
 ```
-THINK → Prioritizes loading project_brief.md, architecture.md, patterns.md
-PLAN → Prioritizes loading current_context.md, decisions.md, patterns.md
-IMPLEMENT → Prioritizes loading current_context.md, progress.md, patterns.md
-REVIEW → Prioritizes loading patterns.md, architecture.md, progress.md
-DOCUMENT → Loads all relevant memory files based on documentation target
+THINK → Prioritize requesting project_brief.md, architecture.md, patterns.md
+PLAN → Prioritize requesting current_context.md, decisions.md, patterns.md
+IMPLEMENT → Prioritize requesting current_context.md, progress.md, patterns.md
+REVIEW → Prioritize requesting patterns.md, architecture.md, progress.md
+DOCUMENT → Request all relevant memory files based on documentation target
 ```
 
 ## Complexity-Based Scaling
 
-The system scales context loading based on project complexity:
+I should scale my context requests based on project complexity:
 
 ```
-Level 1 (Simple): Only load immediately relevant memory files
-Level 2 (Moderate): Load relevant files plus direct dependencies
-Level 3 (Complex): Load extended context including architectural considerations
-Level 4 (Enterprise): Load comprehensive context with system-wide implications
+Level 1 (Simple): Request only immediately relevant memory files
+Level 2 (Moderate): Request relevant files plus direct dependencies
+Level 3 (Complex): Request extended context including architectural considerations
+Level 4 (Enterprise): Request comprehensive context with system-wide implications
 ```
 
-## Context Loading Implementation
+## Context Request Implementation
 
-1. When a file is opened, the system:
-   - Identifies file type and location
-   - Checks current operational mode
-   - Determines project complexity level
-   - Evaluates recent user activity
-   - Loads appropriate memory files based on these factors
+Since I cannot automatically load files, I will:
 
-2. Context is loaded in this order:
-   - Mode-specific priority files
-   - Location-specific memory
-   - File type associations
-   - Activity-based context
-   - Additional context based on complexity level
+1. **Observe current context**: Note which files are being discussed or edited
+2. **Identify relevant memory**: Determine which memory files would be helpful
+3. **Request specific files**: Ask the user to open key memory files
+   - "To provide better assistance with this task, could you please open .cursor/memory/long_term/patterns.md?"
+4. **Explain the relevance**: Clarify why the requested file would be helpful
+   - "Seeing the patterns.md file would help me understand the established conventions for API implementation."
+5. **Prioritize requests**: Ask for the most important files first, not all at once
+   - "Let's start with the current_context.md file, then we can look at progress.md if needed."
 
-## Context Refresh Rules
+## Context Refresh Requests
 
-Memory context is automatically refreshed when:
+I should request refreshed memory context when:
 
-- Switching between files
+- Switching between significantly different files
 - Changing operational modes
-- Updating memory files
-- After a configurable idle period (default: 30 minutes)
-- Explicitly requested via `/memory refresh`
+- After significant project updates are mentioned
+- When explicitly asked to refresh my understanding
+- When my responses seem to lack necessary context
 
-## Memory Access Tracking
+## Manual Context Commands
 
-The system maintains a memory access log (.cursor/memory/access_log.json) that tracks:
+I understand these commands for explicit context management:
 
-- Which memory files were loaded
-- When they were accessed
-- In what context they were used
-- Which files/features they were applied to
+- `/context load <memory_file>` - Request to open a specific memory file
+- `/context unload <memory_file>` - Note that a specific memory file is no longer needed
+- `/context refresh` - Request to reload relevant memory files
+- `/context status` - Report which memory files I'm currently aware of
+- `/context suggest` - Suggest additional helpful memory files
 
-This log is used to improve future context loading decisions by learning from usage patterns.
-
-## Context Loading Commands
-
-Manual control over context loading:
-
-- `/context load <memory_file>` - Explicitly load specific memory file
-- `/context unload <memory_file>` - Remove specific memory file from context
-- `/context refresh` - Reload all context based on current state
-- `/context status` - Show currently loaded memory files
-- `/context suggest` - Get suggestions for additional relevant context
+When I receive a context command, I will:
+1. Acknowledge the command
+2. Take appropriate action (request file access, etc.)
+3. Confirm when the context has been updated
 EOF
 
-# Create 005_memory_events.mdc
+# 005_memory_events.mdc
 cat > .cursor/rules/005_memory_events.mdc << 'EOF'
 ---
-description: Rules for event-triggered memory system updates based on development activities
+description: Rules for user-reported event handling and suggested memory updates
 globs: alwaysApply: true
 ---
 
 # Memory Events System
 
-This rule defines how the memory system automatically updates based on development events and activities without requiring explicit commands.
+This rule defines how I should respond to user-reported development events and suggest appropriate memory updates based on these events.
 
-## Event Detection
+## Event Reporting
 
-The memory system monitors these development events:
+Since automatic event detection isn't possible within Cursor's environment, I rely on users to report significant events using:
 
-- **File Creation**: New files added to the project
-- **File Modification**: Changes to existing files
-- **File Deletion**: Removal of project files
-- **Build Events**: Successful/failed build operations
-- **Test Execution**: Test runs and their results
-- **Git Operations**: Commits, branch changes, merges
-- **Session Boundaries**: Start/end of development sessions
-- **Mode Transitions**: Changes between operational modes (manually selected in UI)
-- **Memory Commands**: Explicit memory system interactions
-- **User Annotations**: Comments marked with specific tags (e.g., `// @memory`)
+```
+/memory event <event_type> <description>
+```
 
-## Event-Triggered Actions
+For example:
+```
+/memory event commit "Implemented user authentication flow"
+```
 
-When events are detected, the memory system automatically:
+## Supported Event Types
 
-1. Updates relevant memory files
-2. Prompts for important information when needed
-3. Reorganizes memory based on emerging patterns
-4. Suggests memory consolidation for related updates
-5. Adjusts memory prioritization based on development focus
+I recognize and respond to these event types:
+
+### File Events
+
+| Event Type | Description | Example |
+|------------|-------------|---------|
+| `create` | New file added | `/memory event create "Created auth middleware"` |
+| `modify` | File modified | `/memory event modify "Updated login component"` |
+| `delete` | File removed | `/memory event delete "Removed legacy auth"` |
+
+### Build Events
+
+| Event Type | Description | Example |
+|------------|-------------|---------|
+| `build_success` | Build completed successfully | `/memory event build_success "All tests passing"` |
+| `build_failure` | Build failed | `/memory event build_failure "Auth module failing"` |
+
+### Test Events
+
+| Event Type | Description | Example |
+|------------|-------------|---------|
+| `test_success` | Tests passed | `/memory event test_success "Auth tests passing"` |
+| `test_failure` | Tests failed | `/memory event test_failure "Login tests failing"` |
+
+### Git Events
+
+| Event Type | Description | Example |
+|------------|-------------|---------|
+| `commit` | Code committed | `/memory event commit "Implemented authentication"` |
+| `branch` | Branch changed | `/memory event branch "Switched to feature/auth"` |
+| `merge` | Branches merged | `/memory event merge "Merged auth branch to main"` |
+
+### Session Events
+
+| Event Type | Description | Example |
+|------------|-------------|---------|
+| `session_start` | Beginning development session | `/memory event session_start "Starting auth work"` |
+| `session_end` | Ending development session | `/memory event session_end "Completed login feature"` |
+
+### Mode Events
+
+| Event Type | Description | Example |
+|------------|-------------|---------|
+| `mode_change` | Switched operational modes | `/memory event mode_change "PLAN to IMPLEMENT"` |
+
+## Event Response Protocol
+
+When an event is reported, I will follow this protocol:
+
+1. **Acknowledge the event**: Confirm that I've understood the reported event
+   - "I've noted your report of the [event_type]: [description]"
+
+2. **Suggest memory updates**: Based on the event type, suggest appropriate memory updates
+   - "Based on this event, I suggest updating the following memory files:"
+
+3. **Provide update content**: Offer specific content to be added to memory files
+   - "Here's the content you can add to progress.md:"
+
+4. **Confirm implementation**: Ask for confirmation when updates are completed
+   - "Have you updated the memory files? Let me know when it's done."
 
 ## Event-Memory Mappings
 
-Different events trigger updates to specific memory files:
+Different events should trigger updates to specific memory files:
 
 ```
 File Creation:
-  - Update progress.md with new component information
-  - Consider updating architecture.md for structural additions
-  - Add to current_context.md if related to active task
+  → Suggest updates to progress.md with new component information
+  → Suggest updates to architecture.md for structural additions
+  → Suggest updates to current_context.md if related to active task
 
 File Modification:
-  - Update current_context.md with latest changes
-  - Consider pattern extraction for repeated modifications
-  - Update progress.md for significant milestones
+  → Suggest updates to current_context.md with latest changes
+  → Consider suggesting pattern extraction for repeated modifications
+  → Suggest updates to progress.md for significant milestones
 
 Successful Build:
-  - Update progress.md with build success
-  - Consider updating current_context.md with next steps
-  - Add build information to session_notes.md
+  → Suggest updates to progress.md with build success
+  → Consider suggesting updates to current_context.md with next steps
+  → Suggest adding build information to session_notes.md
 
 Failed Build:
-  - Add issues to current_context.md
-  - Update session_notes.md with error details
-  - Consider adding to patterns.md for recurring problems
+  → Suggest adding issues to current_context.md
+  → Suggest updating session_notes.md with error details
+  → Consider suggesting additions to patterns.md for recurring problems
 
 Test Execution:
-  - Update progress.md with test results
-  - Add testing notes to session_notes.md
-  - Consider pattern updates for test approaches
+  → Suggest updates to progress.md with test results
+  → Suggest adding testing notes to session_notes.md
+  → Consider suggesting pattern updates for test approaches
 
 Git Commit:
-  - Update progress.md with commit milestone
-  - Consider extracting commit message for decision documentation
-  - Update current_context.md with next steps
+  → Suggest updates to progress.md with commit milestone
+  → Consider suggesting decision documentation from commit message
+  → Suggest updates to current_context.md with next steps
 
 Branch Change:
-  - Update current_context.md with branch context
-  - Load relevant feature context from long-term memory
-  - Consider context switch in progress.md
+  → Suggest updates to current_context.md with branch context
+  → Suggest loading relevant feature context from long-term memory
+  → Consider suggesting context switch in progress.md
 
 Mode Transition:
-  - Update specific memory files based on mode rules
-  - Promote/consolidate memory based on transition type
-  - Update current_context.md with mode-specific focus
+  → Suggest updates to specific memory files based on mode rules
+  → Suggest promoting/consolidating memory based on transition type
+  → Suggest updates to current_context.md with mode-specific focus
 
 Session Start:
-  - Load relevant memory context
-  - Resume current_context.md from previous session
-  - Update session_notes.md with session start
+  → Suggest loading relevant memory context
+  → Suggest resuming current_context.md from previous session
+  → Suggest updating session_notes.md with session start
 
 Session End:
-  - Consolidate session_notes.md
-  - Update progress.md with session accomplishments
-  - Consider promoting short-term to long-term memory
+  → Suggest consolidating session_notes.md
+  → Suggest updating progress.md with session accomplishments
+  → Suggest promoting important short-term to long-term memory
 ```
 
-## User Annotation Processing
+## Annotation Recognition
 
-Special comment annotations trigger specific memory actions:
+I recognize code comment annotations and suggest appropriate memory updates:
 
 ```
 // @memory:note This approach handles edge cases better than alternatives
-→ Adds note to session_notes.md
+→ Suggest adding to session_notes.md
 
 // @memory:decision We're using JWT for authentication
-→ Adds to decisions.md
+→ Suggest adding to decisions.md
 
 // @memory:pattern This pattern for API routing should be followed
-→ Adds to patterns.md
+→ Suggest adding to patterns.md
 
 // @memory:architecture This service handles payment processing
-→ Adds to architecture.md
+→ Suggest adding to architecture.md
 
 // @memory:todo Refactor this component to use the new pattern
-→ Adds to current_context.md
+→ Suggest adding to current_context.md
 
 // @memory:progress Completed user authentication flow
-→ Updates progress.md
+→ Suggest updating progress.md
 ```
 
-## Memory Event Configuration
+When I notice these annotations in code, I'll suggest appropriate memory updates.
 
-The event system is configurable in `.cursor/memory/config.json`:
+## Update Content Formatting
 
-```json
-{
-  "events": {
-    "enabled": true,
-    "fileCreation": {
-      "enabled": true,
-      "memoryUpdates": ["progress", "current_context"]
-    },
-    "fileModification": {
-      "enabled": true,
-      "threshold": "significant",
-      "memoryUpdates": ["current_context", "progress"]
-    },
-    "buildEvents": {
-      "enabled": true,
-      "failureUpdates": ["current_context", "session_notes"],
-      "successUpdates": ["progress"]
-    },
-    "gitOperations": {
-      "enabled": true,
-      "commitUpdates": ["progress"],
-      "branchUpdates": ["current_context"]
-    },
-    "sessionBoundaries": {
-      "enabled": true,
-      "startUpdates": ["current_context", "session_notes"],
-      "endUpdates": ["progress", "session_notes"]
-    },
-    "annotations": {
-      "enabled": true,
-      "patterns": {
-        "note": "session_notes.md",
-        "decision": "decisions.md",
-        "pattern": "patterns.md",
-        "architecture": "architecture.md",
-        "todo": "current_context.md",
-        "progress": "progress.md"
-      }
-    }
-  }
-}
-```
+When suggesting memory updates, I'll format the content appropriately:
 
-## Event Processing Rules
+1. **Progress Updates**: Include timestamp, description, status, and next steps
+   ```markdown
+   ### User Authentication
+   **Completed:** 2025-04-14
+   **Description:** Implemented basic authentication flow
+   **Status:** In progress (70%)
+   **Next Steps:** Add password reset functionality
+   ```
 
-The system processes events with these rules:
+2. **Decisions**: Include decision, date, rationale, and implications
+   ```markdown
+   ### Authentication Approach
+   **Decision:** Use JWT with asymmetric keys
+   **Date:** 2025-04-14
+   **Rationale:** Better security and support for microservices
+   **Implications:**
+   - Need to implement key rotation
+   - Simplifies cross-service authentication
+   ```
 
-1. **Priority Order**: Events are processed in priority order (high to low):
-   - Explicit commands
-   - User annotations
-   - Mode transitions
-   - Git operations
-   - Build/test events
-   - File operations
-   - Session boundaries
+3. **Patterns**: Include name, usage, implementation, and example
+   ```markdown
+   ### Repository Pattern
+   **Usage:** Data access abstraction
+   **Implementation:** Interface + concrete implementation
+   **Example:**
+   ```typescript
+   interface UserRepository {
+     findById(id: string): Promise<User>;
+   }
+   ```
 
-2. **Batching**: Similar events within a short timeframe are batched
-   - Multiple file modifications treated as a single logical change
-   - Multiple test runs consolidated into a single result
-   - Related memory updates combined for consistency
+## Memory Update Suggestions
 
-3. **Conflict Resolution**: When events conflict:
-   - Explicit commands override automatic events
-   - Later events override earlier ones in same priority level
-   - User is prompted for resolution when automatic resolution fails
-
-4. **Threshold Filtering**: Events are filtered based on significance:
-   - Minor file changes may not trigger updates
-   - Frequent build attempts may be consolidated
-   - Trivial git operations may be ignored
-   - Significance thresholds are configurable
-
-## Event Notification
-
-The system notifies users about memory updates:
+I'll make memory update suggestions in this format:
 
 ```
-MEMORY UPDATE: progress.md
-TRIGGER: Successful build
-CHANGES: Added milestone "Authentication API completed"
+MEMORY UPDATE SUGGESTION
+FILE: <file_path>
+BASED ON: <event_type> - <description>
+SUGGESTED CONTENT:
+
+<formatted_content>
+
+Would you like me to provide this update? (You can copy it to the file)
 ```
 
-Notification levels are configurable:
-- `none`: No notifications
-- `minimal`: Essential updates only
-- `standard`: All significant updates
-- `verbose`: All updates with details
+## Integration with Modes
 
-## Event Command Interface
+Different operational modes influence how I respond to events:
 
-Manual control over the event system:
+- **THINK Mode**: Emphasize research findings and exploration notes
+- **PLAN Mode**: Focus on task breakdown and implementation plans
+- **IMPLEMENT Mode**: Prioritize progress updates and implementation details 
+- **REVIEW Mode**: Highlight improvement suggestions and issue tracking
+- **DOCUMENT Mode**: Balance updates across all long-term memory files
 
-- `/events status` - Check event system status
-- `/events enable <type>` - Enable specific event type
-- `/events disable <type>` - Disable specific event type
-- `/events trigger <type>` - Manually trigger event processing
-- `/events config <key> <value>` - Configure event system
+I'll adjust my event response based on the current operational mode.
 EOF
 
 # Create config.json
+echo "Creating configuration file..."
+
 cat > .cursor/memory/config.json << 'EOF'
 {
   "system": {
@@ -878,7 +958,7 @@ cat > .cursor/memory/config.json << 'EOF'
       }
     }
   },
-  "auto_context": {
+  "context_requests": {
     "enabled": true,
     "max_files": 5,
     "refresh_interval": "30m",
@@ -887,50 +967,31 @@ cat > .cursor/memory/config.json << 'EOF'
       "level_2": 3, 
       "level_3": 5,
       "level_4": 8
+    },
+    "file_associations": {
+      "typescript": ["patterns.md", "architecture.md"],
+      "python": ["patterns.md", "architecture.md"],
+      "tests": ["patterns.md", "testing.md"],
+      "documentation": ["project_brief.md", "architecture.md"]
     }
   },
   "events": {
     "enabled": true,
     "notification_level": "standard",
-    "batch_window": "5s",
-    "fileCreation": {
-      "enabled": true,
-      "memoryUpdates": ["progress", "current_context"]
+    "reportable_events": {
+      "file": ["create", "modify", "delete"],
+      "build": ["build_success", "build_failure"],
+      "test": ["test_success", "test_failure"],
+      "git": ["commit", "branch", "merge"],
+      "session": ["session_start", "session_end"],
+      "mode": ["mode_change"]
     },
-    "fileModification": {
-      "enabled": true,
-      "threshold": "significant",
-      "memoryUpdates": ["current_context", "progress"]
-    },
-    "buildEvents": {
-      "enabled": true,
-      "failureUpdates": ["current_context", "session_notes"],
-      "successUpdates": ["progress"]
-    },
-    "testExecution": {
-      "enabled": true,
-      "failureUpdates": ["current_context", "session_notes"],
-      "successUpdates": ["progress"]
-    },
-    "gitOperations": {
-      "enabled": true,
-      "commitUpdates": ["progress"],
-      "branchUpdates": ["current_context"]
-    },
-    "sessionBoundaries": {
-      "enabled": true,
-      "startUpdates": ["current_context", "session_notes"],
-      "endUpdates": ["progress", "session_notes"]
-    },
-    "modeTransitions": {
-      "enabled": true,
-      "updates": {
-        "THINK": ["working_decisions", "session_notes"],
-        "PLAN": ["current_context", "working_decisions"],
-        "IMPLEMENT": ["progress", "current_context"],
-        "REVIEW": ["session_notes", "working_decisions"],
-        "DOCUMENT": ["progress", "decisions", "patterns", "architecture"]
-      }
+    "update_suggestions": {
+      "commit": ["progress.md", "current_context.md"],
+      "build_success": ["progress.md"],
+      "build_failure": ["current_context.md", "session_notes.md"],
+      "test_success": ["progress.md"],
+      "test_failure": ["current_context.md", "session_notes.md"]
     },
     "annotations": {
       "enabled": true,
@@ -965,24 +1026,12 @@ cat > .cursor/memory/config.json << 'EOF'
       "mode_confirmed": "Confirmed: You're now in %s mode",
       "mode_reminder": "Remember to manually select modes through Cursor's UI dropdown"
     },
-    "auto_transition": {
-      "enabled": false,
-      "requires_ui_selection": true,
-      "suggestions_only": true,
-      "rules": [
-        {
-          "from": "PLAN",
-          "to": "IMPLEMENT",
-          "condition": "plan_approved",
-          "suggestion": "The plan is approved. Would you like to switch to IMPLEMENT mode? Please select IMPLEMENT from the UI dropdown, then confirm with /mode implement"
-        },
-        {
-          "from": "IMPLEMENT",
-          "to": "REVIEW",
-          "condition": "implementation_complete",
-          "suggestion": "Implementation is complete. Would you like to switch to REVIEW mode? Please select REVIEW from the UI dropdown, then confirm with /mode review"
-        }
-      ]
+    "context_requests": {
+      "THINK": ["project_brief.md", "architecture.md", "patterns.md"],
+      "PLAN": ["current_context.md", "decisions.md", "patterns.md"],
+      "IMPLEMENT": ["current_context.md", "progress.md", "patterns.md"],
+      "REVIEW": ["patterns.md", "architecture.md", "progress.md"],
+      "DOCUMENT": ["project_brief.md", "architecture.md", "patterns.md", "decisions.md", "progress.md"]
     }
   },
   "templates": {
@@ -1379,8 +1428,9 @@ echo "✅ Enhanced Memory Bank System has been successfully initialized!"
 echo ""
 echo "You can now use memory commands in Cursor:"
 echo "  - /memory status - Check memory system status"
-echo "  - /memory recall <context> - Load specific memory"
-echo "  - /memory update <file> <content> - Update memory files"
+echo "  - /memory recall <context> - Request to see specific memory"
+echo "  - /memory update <file> <content> - Suggest memory updates"
+echo "  - /memory event <type> <details> - Report development events"
 echo ""
 echo "To use mode-specific features:"
 echo "  1. Select the desired mode from Cursor's UI dropdown"
