@@ -17,7 +17,7 @@ The simplest way to install the Enhanced Memory Bank System is using the provide
 1. **Download the script**:
 
    ```bash
-   curl -L -o init-memory-bank.sh https://raw.githubusercontent.com/your-username/cursor-memory-bank/main/init-memory-bank.sh
+   curl -L -o init-memory-bank.sh https://raw.githubusercontent.com/forsonny/Enhanced-Cursor-Memory-Bank-System/refs/heads/main/init-memory-bank.sh
    ```
 
 2. **Make it executable**:
@@ -181,7 +181,7 @@ If you're still experiencing problems:
 2. Verify the content of your `.mdc` rules files
 3. Make sure Cursor's custom modes feature is enabled
 
-For additional assistance, please [open an issue](https://github.com/your-username/cursor-memory-bank/issues) on the GitHub repository.
+For additional assistance, please [open an issue](https://github.com/forsonny/Enhanced-Cursor-Memory-Bank-System/issues) on the GitHub repository.
 
 ## Next Steps
 
