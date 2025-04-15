@@ -1,7 +1,3 @@
-<p align="center">
-  <img width="300" height="300" src="https://github.com/forsonny/Enhanced-Cursor-Memory-Bank-System/blob/main/assets/logo-500.png">
-</p>
-
 # Enhanced Memory Bank System for Cursor
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
@@ -25,7 +21,7 @@ A comprehensive memory system for Cursor IDE that provides both short-term sessi
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/cursor-memory-bank.git
+git clone https://github.com/forsonny/Enhanced-Cursor-Memory-Bank-System.git
 
 # Navigate to your project
 cd your-project
@@ -37,7 +33,7 @@ path/to/init-memory-bank.sh
 Or download and run directly:
 
 ```bash
-curl -L -o init-memory-bank.sh https://raw.githubusercontent.com/your-username/cursor-memory-bank/main/init-memory-bank.sh
+curl -L -o init-memory-bank.sh https://raw.githubusercontent.com/forsonny/Enhanced-Cursor-Memory-Bank-System/refs/heads/main/init-memory-bank.sh
 chmod +x init-memory-bank.sh
 ./init-memory-bank.sh
 ```
@@ -183,4 +179,6 @@ This project was inspired by:
 
 ## 📱 Contact
 
-Project Link: [https://github.com/forsonny/Enhanced-Cursor-Memory-Bank-System](https://github.com/forsonny/Enhanced-Cursor-Memory-Bank-System)
+Your Name - [@your_twitter](https://twitter.com/your_twitter) - email@example.com
+
+Project Link: [https://github.com/your-username/cursor-memory-bank](https://github.com/your-username/cursor-memory-bank)
