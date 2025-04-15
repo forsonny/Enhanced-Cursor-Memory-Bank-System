@@ -1,0 +1,477 @@
+---
+description: Defines operational modes with specialized memory behaviors
+globs: alwaysApply: true
+---
+
+# Operational Mode Definitions
+
+This rule defines distinct operational modes that change how I interact with the codebase and memory system. Each mode has specialized memory behaviors optimized for different phases of development.
+
+## Mode Switching Protocol
+
+Mode switching requires two steps:
+
+1. **UI Selection**: First, manually select the mode from Cursor's UI dropdown menu
+2. **Mode Confirmation**: Then, signal your intent to the AI:
+
+```
+/mode <mode_name>
+```
+
+Example: Select "THINK" in the UI dropdown, then type `/mode think` to confirm
+
+I will verify you're in the correct mode before proceeding.
+
+## Mode Overview
+
+```mermaid
+graph TD
+    T[THINK] -->|Exploration Complete| P[PLAN]
+    P -->|Plan Approved| I[IMPLEMENT]
+    I -->|Implementation Complete| R[REVIEW]
+    R -->|Issues Found| T
+    T -->|Small Change| I
+    R -->|Approved| D[DOCUMENT]
+    D -->|New Feature| T
+    
+    style T fill:#f9f,stroke:#333,stroke-width:2px
+    style P fill:#bbf,stroke:#333,stroke-width:2px
+    style I fill:#bfb,stroke:#333,stroke-width:2px
+    style R fill:#fbb,stroke:#333,stroke-width:2px
+    style D fill:#ffb,stroke:#333,stroke-width:2px
+```
+
+## Mode Definitions
+
+### THINK Mode
+
+Purpose: Explore problems, research solutions, and understand requirements before implementation.
+
+Memory Behavior:
+- Requests access to architecture.md and patterns.md
+- Suggests updating working_decisions.md with pros/cons of approaches
+- Helps record research findings in session_notes.md
+- Does not modify production code
+
+Commands:
+- `/think explore <topic>` - Start guided exploration of a topic
+- `/think compare <options>` - Analyze trade-offs between approaches
+- `/think research <query>` - Research and document findings on a topic
+
+Memory Files:
+- Primary: working_decisions.md, session_notes.md
+- Reference: architecture.md, patterns.md, project_brief.md
+
+### PLAN Mode
+
+Purpose: Develop detailed implementation plans without making code changes.
+
+Memory Behavior:
+- Requests access to current_context.md and patterns.md
+- Helps create structured implementation plans
+- Suggests updates to current_context.md with task breakdown
+- Validates plans against patterns.md and architecture.md
+- Helps record planning decisions in decisions.md when finalized
+
+Commands:
+- `/plan create <feature>` - Create plan for implementing feature
+- `/plan validate` - Check plan against system architecture
+- `/plan estimate` - Estimate effort for current plan
+- `/plan approve` - Mark plan as approved and ready for implementation
+
+Memory Files:
+- Primary: current_context.md, working_decisions.md
+- Reference: architecture.md, patterns.md, decisions.md
+
+### IMPLEMENT Mode
+
+Purpose: Execute plans and implement code changes according to defined approaches.
+
+Memory Behavior:
+- Requests access to current_context.md for task details
+- Suggests updates to progress.md with implementation status
+- Helps record implementation decisions in decisions.md
+- Suggests updates to patterns.md when new patterns emerge
+- May suggest updates to architecture.md for significant structural changes
+
+Commands:
+- `/implement start <task>` - Begin implementation of specific task
+- `/implement checkpoint` - Record progress checkpoint
+- `/implement complete` - Mark current task as complete
+- `/implement issue <description>` - Record implementation issue
+
+Memory Files:
+- Primary: progress.md, current_context.md
+- Reference: patterns.md, architecture.md, decisions.md
+
+### REVIEW Mode
+
+Purpose: Analyze existing code and suggest improvements.
+
+Memory Behavior:
+- Requests access to patterns.md to compare implementation
+- Helps create review notes in session_notes.md
+- Suggests improvements in working_decisions.md
+- References architecture.md to ensure architectural alignment
+- May suggest updates to patterns.md based on code quality findings
+
+Commands:
+- `/review code <file>` - Review specific file
+- `/review feature <feature>` - Review entire feature
+- `/review suggest` - Generate improvement suggestions
+- `/review approve` - Mark current implementation as reviewed and approved
+
+Memory Files:
+- Primary: session_notes.md, working_decisions.md
+- Reference: patterns.md, architecture.md, progress.md
+
+### DOCUMENT Mode
+
+Purpose: Create and update documentation.
+
+Memory Behavior:
+- Requests access to all relevant memory files
+- Helps update long-term memory files with implementation details
+- Suggests consolidating related short-term memories into long-term
+- Ensures consistency between memory files
+- Helps promote temporary decisions to permanent records
+- Maintains project progress history
+
+Commands:
+- `/document update <file>` - Update specific documentation
+- `/document generate <type>` - Generate documentation from code
+- `/document promote <temp_file>` - Promote temporary documentation to permanent
+- `/document validate` - Check documentation for consistency
+
+Memory Files:
+- Primary: All long-term memory files
+- Reference: All short-term memory files
+
+## Mode-Specific Memory Protocols
+
+### Memory Loading Requests
+
+When switching modes, I will request access to these key files:
+
+```
+THINK: project_brief.md, architecture.md, patterns.md
+PLAN: current_context.md, decisions.md, patterns.md
+IMPLEMENT: current_context.md, progress.md, patterns.md
+REVIEW: patterns.md, architecture.md, progress.md
+DOCUMENT: All relevant memory files
+```
+
+### Memory Update Suggestions
+
+Each mode has specific events that should trigger memory updates:
+
+```
+THINK: New approach identified, Research finding, Decision framework established
+PLAN: Task breakdown created, Plan finalized, Risk identified
+IMPLEMENT: Code committed, Test created, Feature completed
+REVIEW: Issue found, Improvement identified, Review completed
+DOCUMENT: Documentation updated, Memory consolidated, Diagram created
+```
+
+I will suggest appropriate memory updates when these events occur.
+
+## Memory Access Interactions
+
+Since I cannot directly access or modify files without user intervention, I will:
+
+1. **Request Access**: Ask the user to open specific memory files when needed
+   - "To help with this task, could you please open the current_context.md file?"
+
+2. **Suggest Updates**: Provide clear update suggestions for memory files
+   - "Based on our discussion, I suggest updating the patterns.md file with this new pattern..."
+
+3. **Provide Content**: Offer formatted content that can be added to memory files
+   - "Here's the content you can add to the progress.md file:"
+
+4. **Confirm Changes**: Ask for confirmation when memory has been updated
+   - "Have you updated the file? Let me know when it's ready."
+
+## Mode Verification
+
+I will verify that operations align with the current mode:
+
+1. Confirm the user has selected the appropriate mode in the UI
+2. Check that requests match the current operational mode
+3. Suggest mode switches when activities don't align with the current mode
+4. Request confirmation before proceeding with mode-specific operations
+
+This ensures that memory operations are consistent with the intended development phase.
+
+## Mode-Specific Command Behaviors
+
+### Mode Confirmation Behavior
+
+For `/mode <mode_name>`:
+1. Verify the mode matches UI selection
+2. Load appropriate memory files for the mode
+3. Acknowledge the mode change
+4. Explain the mode focus
+5. Request access to mode-specific memory files
+
+### THINK Mode Commands Behavior
+
+For `/think explore <topic>`:
+1. Check mode is THINK
+2. Guide systematic exploration of topic
+3. Structure findings
+4. Suggest updating session_notes.md and working_decisions.md with exploration results
+
+For `/think compare <options>`:
+1. Check mode is THINK
+2. Analyze all options with pros/cons
+3. Create comparison table
+4. Suggest preliminary decision
+5. Suggest updating working_decisions.md with comparison
+
+For `/think research <query>`:
+1. Check mode is THINK
+2. Organize research plan
+3. Suggest information sources
+4. Structure findings
+5. Suggest adding research to session_notes.md
+
+### PLAN Mode Commands Behavior
+
+For `/plan create <feature>`:
+1. Check mode is PLAN
+2. Generate step-by-step implementation plan
+3. Break into tasks
+4. Suggest updating current_context.md with plan details
+
+For `/plan validate`:
+1. Check mode is PLAN
+2. Request access to architecture.md and patterns.md
+3. Verify plan compatibility
+4. Suggest changes if needed
+
+For `/plan estimate`:
+1. Check mode is PLAN
+2. Request access to current_context.md
+3. Generate time/effort estimates for each step
+4. Suggest updating plan with estimates
+
+For `/plan approve`:
+1. Check mode is PLAN
+2. Request access to current_context.md
+3. Suggest promoting plan to decisions.md
+4. Update progress.md with planned items
+
+### IMPLEMENT Mode Commands Behavior
+
+For `/implement start <task>`:
+1. Check mode is IMPLEMENT
+2. Request access to current_context.md
+3. Update progress.md with task start
+4. Focus assistance on implementation details
+
+For `/implement checkpoint`:
+1. Check mode is IMPLEMENT
+2. Record current implementation progress
+3. Suggest updating progress.md with checkpoint details
+4. Confirm next steps
+
+For `/implement complete`:
+1. Check mode is IMPLEMENT
+2. Request confirmation of completion
+3. Suggest updating progress.md and current_context.md to reflect completion
+
+For `/implement issue <description>`:
+1. Check mode is IMPLEMENT
+2. Document issue details
+3. Suggest adding to session_notes.md and current_context.md
+4. Propose resolution approach
+
+### REVIEW Mode Commands Behavior
+
+For `/review code <file>`:
+1. Check mode is REVIEW
+2. Request access to specified file and patterns.md
+3. Analyze code against patterns
+4. List improvements
+5. Suggest updating session_notes.md with findings
+
+For `/review feature <feature>`:
+1. Check mode is REVIEW
+2. Request access to relevant files and patterns.md
+3. Perform broad feature review
+4. Check consistency
+5. Suggest updating session_notes.md with review
+
+For `/review suggest`:
+1. Check mode is REVIEW
+2. Generate prioritized improvement list based on recent reviews
+3. Suggest adding to working_decisions.md
+
+For `/review approve`:
+1. Check mode is REVIEW
+2. Suggest updating progress.md to indicate review approval
+3. Add approval details to decisions.md if needed
+
+### DOCUMENT Mode Commands Behavior
+
+For `/document update <file>`:
+1. Check mode is DOCUMENT
+2. Request access to specified documentation file
+3. Suggest updated content
+4. Provide formatted updates
+5. Confirm after changes
+
+For `/document generate <type>`:
+1. Check mode is DOCUMENT
+2. Request access to relevant code files
+3. Generate documentation based on code structure and comments
+4. Suggest file for storing documentation
+
+For `/document promote <temp_file>`:
+1. Check mode is DOCUMENT
+2. Request access to temporary file
+3. Identify content to promote
+4. Generate formatted content for permanent documentation
+5. Suggest additions to appropriate long-term files
+
+For `/document validate`:
+1. Check mode is DOCUMENT
+2. Request access to documentation files
+3. Check for inconsistencies
+4. Identify outdated information
+5. Generate list of suggested updates
+
+### Context Commands Behavior
+
+For `/context load <memory_file>`:
+1. Request user to open specified memory file
+2. Read content when provided
+3. Acknowledge loading
+4. Reference file in subsequent responses
+
+For `/context status`:
+1. List all memory files currently in context
+2. Indicate when each was last accessed
+3. Note any files that need refreshing
+
+For `/context suggest`:
+1. Based on current task and files, suggest relevant memory files to load
+2. Explain why each would be helpful
+3. Prioritize suggestions
+
+### Code Annotation Behavior
+
+When annotation is identified in code:
+1. Extract annotation content
+2. Generate properly formatted update for appropriate memory file
+3. Suggest adding content to the specific file mentioned in annotation
+4. Include file path, extracted content, and formatted entry in suggestion
+
+## Mode-Specific Response Templates
+
+Each operational mode should include standardized response templates for completing actions. These templates ensure users always receive consistent guidance tailored to the current mode.
+
+### THINK Mode Response Template
+
+After completing THINK mode actions:
+
+```
+## Exploration Report
+- **Completed:** [Exploration activities completed]
+- **Insights Generated:** [Key insights or findings]
+- **Status:** [Complete/In Progress]
+
+## Helpful Commands
+- `/think compare "<option 1> vs <option 2>"` - Compare different approaches
+- `/memory save working_decisions.md` - Save current thinking
+- `/memory update session_notes.md "New insight: [brief insight]"`
+
+## Suggested Next Steps
+- Document your decision framework in working_decisions.md
+- Explore alternative approaches to [relevant topic]
+- Report this exploration with `/memory event think "Explored [topic]"`
+```
+
+### PLAN Mode Response Template
+
+After completing PLAN mode actions:
+
+```
+## Planning Report
+- **Completed:** [Planning activities completed]
+- **Plan Components:** [Key components of the plan]
+- **Status:** [Complete/In Progress]
+
+## Helpful Commands
+- `/plan validate` - Validate plan against architecture
+- `/plan estimate` - Estimate effort for implementation
+- `/memory update current_context.md "Plan details: [brief details]"`
+
+## Suggested Next Steps
+- Break down the plan into specific implementation tasks
+- Validate the plan against existing architecture
+- Report this planning with `/memory event plan "Created plan for [feature]"`
+```
+
+### IMPLEMENT Mode Response Template
+
+After completing IMPLEMENT mode actions:
+
+```
+## Implementation Report
+- **Completed:** [Implementation activities completed]
+- **Components Affected:** [Components that were modified]
+- **Status:** [Complete/In Progress]
+
+## Helpful Commands
+- `/implement checkpoint` - Record implementation progress
+- `/implement complete` - Mark implementation as complete
+- `/memory update progress.md "Implementation status: [brief status]"`
+
+## Suggested Next Steps
+- Create a checkpoint to track your implementation progress
+- Document any patterns discovered during implementation
+- Report this implementation with `/memory event commit "Implemented [feature]"`
+```
+
+### REVIEW Mode Response Template
+
+After completing REVIEW mode actions:
+
+```
+## Review Report
+- **Completed:** [Review activities completed]
+- **Issues Identified:** [Key issues found]
+- **Status:** [Complete/In Progress]
+
+## Helpful Commands
+- `/review suggest` - Generate improvement suggestions
+- `/review approve` - Mark review as approved
+- `/memory update session_notes.md "Review findings: [brief findings]"`
+
+## Suggested Next Steps
+- Document improvement suggestions in working_decisions.md
+- Prioritize issues for future implementation
+- Report this review with `/memory event review "Reviewed [component]"`
+```
+
+### DOCUMENT Mode Response Template
+
+After completing DOCUMENT mode actions:
+
+```
+## Documentation Report
+- **Completed:** [Documentation activities completed]
+- **Files Updated:** [Documentation files updated]
+- **Status:** [Complete/In Progress]
+
+## Helpful Commands
+- `/document validate` - Check documentation consistency
+- `/document promote <temp_file>` - Promote temporary documentation
+- `/memory update long_term/[file] "Documentation update: [brief update]"`
+
+## Suggested Next Steps
+- Ensure consistency across all documentation
+- Promote any temporary decisions to permanent records
+- Report this documentation with `/memory event document "Updated docs for [component]"`
+```

@@ -1,0 +1,136 @@
+---
+description: Rules for requesting relevant memory context based on file types, locations, and current activity
+globs: **/*.*
+---
+
+# Context Loading System
+
+This rule defines how I should request and load relevant memory files into my context based on file types, locations, current activity, and project complexity.
+
+## Context Loading Principles
+
+- Request access to the most relevant memory files for the current task
+- Prioritize recently updated memory files over older ones
+- Include both short-term and long-term memory as appropriate
+- Adapt context requests based on current operational mode
+- Scale context depth with project complexity
+
+## File Type Associations
+
+When working with specific file types, I should request access to these memory contexts:
+
+```
+*.ts, *.tsx, *.js, *.jsx → patterns.md (TypeScript/JavaScript patterns)
+*.py → patterns.md (Python patterns)
+*.go → patterns.md (Go patterns)
+*.rs → patterns.md (Rust patterns)
+*.java, *.kt → patterns.md (Java/Kotlin patterns)
+*.rb → patterns.md (Ruby patterns)
+*.php → patterns.md (PHP patterns)
+*.cs → patterns.md (C# patterns)
+*.cpp, *.c, *.h → patterns.md (C/C++ patterns)
+**/test/**, **/tests/**, **/*.test.*, **/*.spec.* → patterns.md (Testing patterns)
+**/docs/**, **/*.md → documentation.md
+**/config/**, **/*.config.* → configuration.md
+**/db/**, **/database/**, **/*db*.* → database.md
+**/api/**, **/*api*.* → api.md
+**/ui/**, **/components/**, **/*component*.* → ui.md
+**/auth/**, **/*auth*.* → auth.md
+```
+
+## Location-Based Context
+
+The file's location in the project structure indicates I should request these additional contexts:
+
+```
+/ (root) → project_brief.md
+/src/ → architecture.md
+/src/components/ → ui.md
+/src/api/ → api.md
+/src/utils/ → utilities.md
+/src/hooks/ → hooks.md
+/src/contexts/ → contexts.md
+/src/reducers/ → state.md
+/src/db/ → database.md
+/src/auth/ → auth.md
+/src/types/ → types.md
+/tests/ → testing.md
+/docs/ → documentation.md
+/config/ → configuration.md
+/scripts/ → build.md
+```
+
+## Activity-Based Context
+
+Recent user activity suggests I should request these memory files:
+
+```
+Recently discussed test files → testing.md
+Recently discussed build commands → build.md
+Recently discussed documentation → documentation.md
+Recently discussed API endpoints → api.md
+Recently discussed database files → database.md
+Recently discussed configuration → configuration.md
+Recently discussed UI components → ui.md
+```
+
+## Mode-Based Context Requests
+
+The current operational mode determines which memory files I should prioritize requesting:
+
+```
+THINK → Prioritize requesting project_brief.md, architecture.md, patterns.md
+PLAN → Prioritize requesting current_context.md, decisions.md, patterns.md
+IMPLEMENT → Prioritize requesting current_context.md, progress.md, patterns.md
+REVIEW → Prioritize requesting patterns.md, architecture.md, progress.md
+DOCUMENT → Request all relevant memory files based on documentation target
+```
+
+## Complexity-Based Scaling
+
+I should scale my context requests based on project complexity:
+
+```
+Level 1 (Simple): Request only immediately relevant memory files
+Level 2 (Moderate): Request relevant files plus direct dependencies
+Level 3 (Complex): Request extended context including architectural considerations
+Level 4 (Enterprise): Request comprehensive context with system-wide implications
+```
+
+## Context Request Implementation
+
+Since I cannot automatically load files, I will:
+
+1. **Observe current context**: Note which files are being discussed or edited
+2. **Identify relevant memory**: Determine which memory files would be helpful
+3. **Request specific files**: Ask the user to open key memory files
+   - "To provide better assistance with this task, could you please open .cursor/memory/long_term/patterns.md?"
+4. **Explain the relevance**: Clarify why the requested file would be helpful
+   - "Seeing the patterns.md file would help me understand the established conventions for API implementation."
+5. **Prioritize requests**: Ask for the most important files first, not all at once
+   - "Let's start with the current_context.md file, then we can look at progress.md if needed."
+
+## Context Refresh Requests
+
+I should request refreshed memory context when:
+
+- Switching between significantly different files
+- Changing operational modes
+- After significant project updates are mentioned
+- When explicitly asked to refresh my understanding
+- When my responses seem to lack necessary context
+
+## Manual Context Commands
+
+I understand these commands for explicit context management:
+
+- `/context load <memory_file>` - Request to open a specific memory file
+- `/context unload <memory_file>` - Note that a specific memory file is no longer needed
+- `/context refresh` - Request to reload relevant memory files
+- `/context status` - Report which memory files I'm currently aware of
+- `/context suggest` - Suggest additional helpful memory files
+
+When I receive a context command, I will:
+1. Acknowledge the command
+2. Take appropriate action (request file access, etc.)
+3. Confirm when the context has been updated
