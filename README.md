@@ -1,4 +1,4 @@
-![Enhanced Memory Bank System Logo](https://github.com/forsonny/Enhanced-Cursor-Memory-Bank-System/blob/main/assets/logo.png)
+![Enhanced Memory Bank System Logo](https://github.com/forsonny/Enhanced-Cursor-Memory-Bank-System/blob/main/assets/logo-500.png)
 
 # Enhanced Memory Bank System for Cursor
 
