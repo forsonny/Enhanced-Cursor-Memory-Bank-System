@@ -1,0 +1,144 @@
+{
+  "system": {
+    "version": "1.0.0",
+    "initialized": true,
+    "current_mode": "THINK",
+    "complexity_level": 2,
+    "last_updated": "",
+    "memory_root": ".cursor/memory"
+  },
+  "short_term": {
+    "enabled": true,
+    "retention": "7d",
+    "auto_cleanup": true,
+    "files": {
+      "current_context": {
+        "path": "short_term/current_context.md",
+        "description": "Active development focus",
+        "auto_load": true
+      },
+      "working_decisions": {
+        "path": "short_term/working_decisions.md",
+        "description": "Temporary decisions being considered",
+        "auto_load": false
+      },
+      "session_notes": {
+        "path": "short_term/session_notes.md",
+        "description": "Notes from the current session",
+        "auto_load": false
+      }
+    }
+  },
+  "long_term": {
+    "enabled": true,
+    "auto_promote": true,
+    "files": {
+      "project_brief": {
+        "path": "long_term/project_brief.md",
+        "description": "Core project definition",
+        "auto_load": true
+      },
+      "architecture": {
+        "path": "long_term/architecture.md",
+        "description": "System architecture",
+        "auto_load": false
+      },
+      "patterns": {
+        "path": "long_term/patterns.md",
+        "description": "Established patterns and conventions",
+        "auto_load": false
+      },
+      "decisions": {
+        "path": "long_term/decisions.md",
+        "description": "Important project decisions",
+        "auto_load": false
+      },
+      "progress": {
+        "path": "long_term/progress.md",
+        "description": "Development progress tracking",
+        "auto_load": false
+      }
+    }
+  },
+  "context_requests": {
+    "enabled": true,
+    "max_files": 5,
+    "refresh_interval": "30m",
+    "context_depth": {
+      "level_1": 2,
+      "level_2": 3, 
+      "level_3": 5,
+      "level_4": 8
+    },
+    "file_associations": {
+      "typescript": ["patterns.md", "architecture.md"],
+      "python": ["patterns.md", "architecture.md"],
+      "tests": ["patterns.md", "testing.md"],
+      "documentation": ["project_brief.md", "architecture.md"]
+    }
+  },
+  "events": {
+    "enabled": true,
+    "notification_level": "standard",
+    "reportable_events": {
+      "file": ["create", "modify", "delete"],
+      "build": ["build_success", "build_failure"],
+      "test": ["test_success", "test_failure"],
+      "git": ["commit", "branch", "merge"],
+      "session": ["session_start", "session_end"],
+      "mode": ["mode_change"]
+    },
+    "update_suggestions": {
+      "commit": ["progress.md", "current_context.md"],
+      "build_success": ["progress.md"],
+      "build_failure": ["current_context.md", "session_notes.md"],
+      "test_success": ["progress.md"],
+      "test_failure": ["current_context.md", "session_notes.md"]
+    },
+    "annotations": {
+      "enabled": true,
+      "patterns": {
+        "note": "session_notes.md",
+        "decision": "decisions.md",
+        "pattern": "patterns.md",
+        "architecture": "architecture.md",
+        "todo": "current_context.md",
+        "progress": "progress.md"
+      }
+    }
+  },
+  "commands": {
+    "enabled": true,
+    "log_history": true,
+    "shortcuts_enabled": true,
+    "shortcuts": {
+      "/ms": "/memory status",
+      "/mr": "/memory recall",
+      "/mu": "/memory update"
+    }
+  },
+  "modes": {
+    "enabled": true,
+    "default": "THINK",
+    "available": ["THINK", "PLAN", "IMPLEMENT", "REVIEW", "DOCUMENT"],
+    "manual_ui_selection": true,
+    "verification_required": true,
+    "prompt_messages": {
+      "mode_mismatch": "Please select the %s mode in Cursor's UI dropdown first, then confirm with /mode %s",
+      "mode_confirmed": "Confirmed: You're now in %s mode",
+      "mode_reminder": "Remember to manually select modes through Cursor's UI dropdown"
+    },
+    "context_requests": {
+      "THINK": ["project_brief.md", "architecture.md", "patterns.md"],
+      "PLAN": ["current_context.md", "decisions.md", "patterns.md"],
+      "IMPLEMENT": ["current_context.md", "progress.md", "patterns.md"],
+      "REVIEW": ["patterns.md", "architecture.md", "progress.md"],
+      "DOCUMENT": ["project_brief.md", "architecture.md", "patterns.md", "decisions.md", "progress.md"]
+    }
+  },
+  "templates": {
+    "project_brief": "# Project Brief\n\n## Overview\n\n[Project description]\n\n## Goals\n\n- [Goal 1]\n- [Goal 2]\n\n## Requirements\n\n- [Requirement 1]\n- [Requirement 2]\n\n## Constraints\n\n- [Constraint 1]\n- [Constraint 2]",
+    "architecture": "# System Architecture\n\n## Components\n\n- [Component 1]\n- [Component 2]\n\n## Data Flow\n\n[Describe how data flows through the system]\n\n## Technologies\n\n- [Technology 1]\n- [Technology 2]",
+    "current_context": "# Current Context\n\n## Active Task\n\n[Task description]\n\n## Next Steps\n\n1. [Step 1]\n2. [Step 2]\n\n## Open Questions\n\n- [Question 1]\n- [Question 2]"
+  }
+}

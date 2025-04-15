@@ -1,0 +1,280 @@
+---
+description: Defines commands for manual memory operations in the Enhanced Memory Bank system
+globs: alwaysApply: true
+---
+
+# Memory Commands
+
+This rule defines the command interface for directly interacting with the memory system. These commands provide explicit control over memory operations, adapted for Cursor's environment.
+
+## Command Syntax
+
+All memory commands use the `/memory` prefix followed by the specific operation:
+
+```
+/memory <command> [arguments]
+```
+
+## Available Commands
+
+### Core Commands
+
+- `/memory init` - Initialize the memory system for a new project
+  - Checks if memory files and structure exist
+  - Provides instructions for creating necessary files if they don't exist
+  - Guides through initial setup process
+
+- `/memory status` - Display current memory system status
+  - Shows configuration information
+  - Lists available memory files
+  - Reports current mode
+  - Indicates initialization status
+
+- `/memory help` - Show available memory commands and usage
+  - Displays command list with descriptions
+  - Provides examples of common usage
+
+### Memory Management
+
+- `/memory save <context>` - Save current information to specified memory context
+  - Example: `/memory save architecture` to update architecture memory
+  - Options: Add `-t` flag for temporary (short-term) storage
+  - Implementation: Provides text for the user to add to the specified memory file
+
+- `/memory recall <context>` - Retrieve information from specified memory context
+  - Example: `/memory recall patterns` to view established patterns
+  - Options: Add `-v` flag for verbose output with metadata
+  - Implementation: Requests user to open specified file and then reads its content
+
+- `/memory update <file> <content>` - Update specific memory file
+  - Example: `/memory update decisions.md "Decision: We will use TypeScript for all new code"`
+  - Implementation: Provides formatted text for the user to add to the specified file
+
+- `/memory search <query>` - Search across memory for relevant information
+  - Example: `/memory search authentication`
+  - Options: Add `-c <context>` to limit search to specific memory context
+  - Implementation: Requests user to open relevant files, then searches their content
+
+### Memory Organization
+
+- `/memory promote <source>` - Promote short-term memory to long-term
+  - Example: `/memory promote working_decisions.md`
+  - Options: Add `-d <destination>` to specify target file
+  - Implementation: Suggests content to move from short-term to long-term memory
+
+- `/memory archive <file>` - Archive memory that's no longer actively relevant
+  - Example: `/memory archive old_patterns.md`
+  - Implementation: Provides instructions for moving file to archive location
+
+- `/memory consolidate <files>` - Combine related memories into a cohesive document
+  - Example: `/memory consolidate auth_*.md authentication.md`
+  - Implementation: Requests access to source files, then provides consolidated content
+
+### Configuration
+
+- `/memory config <key> <value>` - Update memory system configuration
+  - Example: `/memory config short_term.retention 7d`
+  - Implementation: Provides the JSON to update in config.json
+
+- `/memory toggle <feature>` - Enable/disable specific memory features
+  - Example: `/memory toggle auto_recall`
+  - Implementation: Provides the configuration change to implement
+
+## Command Execution Protocol
+
+Due to Cursor's environment, memory commands follow this execution protocol:
+
+1. **Command Parsing**: I interpret the command and its arguments
+2. **File Access Request**: If needed, I request access to required files
+   - "To process this command, I need to see the content of [file]. Can you open it?"
+3. **Operation Planning**: I determine what changes are needed
+4. **User Confirmation**: I describe the proposed changes and ask for confirmation
+   - "I'll update [file] by adding [content]. Would you like me to proceed?"
+5. **Implementation Guidance**: I provide specific instructions for implementation
+   - "Please add the following content to [file]:"
+6. **Operation Verification**: I confirm when the operation is complete
+   - "The memory has been successfully updated."
+7. **Action Summary and Next Steps**: Provide a structured completion report with options
+   - Include completion summary, command options, and suggested next steps
+
+## Command Response Format
+
+When a memory command is executed, the response follows this format:
+
+```
+MEMORY COMMAND: <command>
+STATUS: <success|planning|failure>
+DETAILS: <relevant details about operation>
+ACTION NEEDED: <what the user needs to do>
+NEXT STEPS: <suggested follow-up actions>
+```
+
+## Command Shortcuts
+
+Quick access shortcuts for common operations:
+
+- `/ms` - Alias for `/memory status`
+- `/mr <context>` - Alias for `/memory recall <context>`
+- `/mu <file> <content>` - Alias for `/memory update <file> <content>`
+
+## Command Authorization
+
+All memory commands are available in any operational mode, but some have mode-specific behaviors:
+
+- Save operations in Review mode include review metadata
+- Update operations in Implement mode include implementation details
+- Consolidate operations in Think mode include decision reasoning
+
+## Command Help System
+
+Each command provides contextual help with the `-h` flag:
+
+```
+/memory save -h
+
+COMMAND: /memory save <context>
+DESCRIPTION: Saves current information to specified memory context
+ARGUMENTS:
+  <context> - Target memory context (required)
+OPTIONS:
+  -t - Store as temporary (short-term) memory
+  -m <message> - Add descriptive message
+EXAMPLES:
+  /memory save architecture
+  /memory save patterns -t
+  /memory save decisions -m "Updated authentication approach"
+```
+
+## User-Driven Events
+
+Since automatic event detection isn't possible, memory commands also support user-driven event reporting:
+
+- `/memory event <type> <details>` - Report a development event
+  - Example: `/memory event commit "Implemented user authentication"`
+  - Implementation: Updates appropriate memory files based on event type
+
+Common event types:
+- `commit` - Code committed to repository
+- `build` - Build completed (success/failure)
+- `test` - Tests run (success/failure)
+- `create` - New file created
+- `modification` - File modified
+- `branch` - Git branch changed
+
+## Command-Specific Behaviors
+
+### Core Memory Commands Behavior
+
+For `/memory status`:
+1. Request access to config.json if needed
+2. Display initialization status, current mode, available memory files, and recent activities
+3. Format response using the STATUS format
+4. Suggest next steps based on system state
+
+For `/memory help`:
+1. List available commands with brief descriptions
+2. Group commands by category 
+3. Provide usage examples for common commands
+4. No file access needed
+
+### Memory Management Behavior
+
+For `/memory save`:
+1. Request user to identify information to save
+2. Generate formatted content appropriate for the target file
+3. Provide complete content to add
+4. Ask for confirmation after updating
+
+For `/memory recall`:
+1. Request user to open the specified file
+2. Read content when provided
+3. Acknowledge receiving content
+4. Reference key points in subsequent responses
+
+For `/memory update`:
+1. Generate properly formatted content for the specified file
+2. Provide complete update text
+3. Suggest placement within file
+4. Ask for confirmation after updating
+
+For `/memory search`:
+1. Request access to relevant files
+2. Search content for query terms
+3. Summarize findings with file sources
+4. Format results clearly
+
+### Memory Organization Behavior
+
+For `/memory promote`:
+1. Request access to source file
+2. Identify content to promote
+3. Generate properly formatted content for destination file
+4. Provide both content and instructions for adding to destination
+
+For `/memory archive`:
+1. Suggest creating archive directory if needed
+2. Provide shell command to move file
+3. Suggest updating references if necessary
+
+For `/memory consolidate`:
+1. Request access to source files
+2. Generate consolidated content maintaining original structure
+3. Provide complete new content for target file
+
+### Configuration Commands Behavior
+
+For `/memory config`:
+1. Request access to config.json
+2. Generate JSON update for specified setting
+3. Provide exact text to update
+4. Explain impact of change
+
+For `/memory toggle`:
+1. Request access to config.json
+2. Identify setting to toggle
+3. Generate JSON update to enable/disable feature
+4. Explain what will change
+
+### Event Reporting Behavior
+
+For `/memory event`:
+1. Acknowledge the event
+2. Identify affected memory files based on event type
+3. Generate appropriate updates for each file
+4. Provide formatted content
+5. Ask for confirmation after updates
+
+### Command Shortcuts Behavior
+
+For command shortcuts:
+1. Interpret shortcuts identically to their full command counterparts
+2. Acknowledge using shortcut in response
+
+## Completion Response Structure
+
+After completing any command or set of actions, I will always conclude with:
+
+```
+## Action Report
+- **Completed:** [List of completed actions]
+- **Status:** [Success/Partial/Failed]
+- **Files Affected:** [List of files updated or referenced]
+
+## Available Commands
+- `/command1` - [Brief description]
+- `/command2` - [Brief description]
+[2-3 relevant commands for current context]
+
+## Suggested Next Steps
+- [Concrete suggestion 1]
+- [Concrete suggestion 2]
+- [Memory update suggestion]
+```
+
+### Mode-Specific Response Focus
+
+- **THINK Mode**: Emphasize exploration commands and documenting discoveries
+- **PLAN Mode**: Emphasize plan validation, refinement, and task breakdowns
+- **IMPLEMENT Mode**: Emphasize progress tracking and checkpointing work
+- **REVIEW Mode**: Emphasize improvement identification and documenting findings
+- **DOCUMENT Mode**: Emphasize documentation completion and consistency checks
