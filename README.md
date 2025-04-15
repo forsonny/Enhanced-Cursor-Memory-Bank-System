@@ -13,6 +13,7 @@ A comprehensive memory system for Cursor IDE that provides both short-term sessi
 - **Rich Command Interface**: Commands for explicit memory operations
 - **Annotation Support**: Use code annotations for memory updates
 - **Memory Promotion**: Convert short-term memory to long-term when valuable
+- **Structured Responses**: Consistent completion reports with next steps and available commands
 
 ## 🚀 Quick Start
 
@@ -122,6 +123,26 @@ The system responds to commands like:
 - `/memory event <type> <details>`: Report development events
 - `/mode <mode_name>`: Confirm operational mode (after UI selection)
 
+### Structured Response Format
+
+After completing actions, the AI will provide:
+
+```
+## Action Report
+- **Completed:** [List of completed actions]
+- **Status:** [Success/Partial/Failed]
+- **Files Affected:** [List of files updated]
+
+## Available Commands
+- `/command1` - [Brief description]
+- `/command2` - [Brief description]
+
+## Suggested Next Steps
+- [Concrete suggestion 1]
+- [Concrete suggestion 2]
+- [Memory update suggestion]
+```
+
 ## How It Works
 
 The Enhanced Memory Bank System works with Cursor's capabilities:
@@ -131,6 +152,7 @@ The Enhanced Memory Bank System works with Cursor's capabilities:
 3. **You report significant events** that trigger memory updates
 4. **AI suggests updates to memory files** that you can implement
 5. **Memory persists across sessions** through the file structure
+6. **AI provides structured completion reports** with next steps and available commands
 
 This approach ensures that context is maintained effectively while working within Cursor's actual capabilities.
 

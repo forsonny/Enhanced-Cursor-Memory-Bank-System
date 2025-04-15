@@ -246,6 +246,8 @@ Due to Cursor's environment, memory commands follow this execution protocol:
    - "Please add the following content to [file]:"
 6. **Operation Verification**: I confirm when the operation is complete
    - "The memory has been successfully updated."
+7. **Action Summary and Next Steps**: Provide a structured completion report with options
+   - Include completion summary, command options, and suggested next steps
 
 ## Command Response Format
 
@@ -310,6 +312,124 @@ Common event types:
 - `create` - New file created
 - `modification` - File modified
 - `branch` - Git branch changed
+
+## Command-Specific Behaviors
+
+### Core Memory Commands Behavior
+
+For `/memory status`:
+1. Request access to config.json if needed
+2. Display initialization status, current mode, available memory files, and recent activities
+3. Format response using the STATUS format
+4. Suggest next steps based on system state
+
+For `/memory help`:
+1. List available commands with brief descriptions
+2. Group commands by category 
+3. Provide usage examples for common commands
+4. No file access needed
+
+### Memory Management Behavior
+
+For `/memory save`:
+1. Request user to identify information to save
+2. Generate formatted content appropriate for the target file
+3. Provide complete content to add
+4. Ask for confirmation after updating
+
+For `/memory recall`:
+1. Request user to open the specified file
+2. Read content when provided
+3. Acknowledge receiving content
+4. Reference key points in subsequent responses
+
+For `/memory update`:
+1. Generate properly formatted content for the specified file
+2. Provide complete update text
+3. Suggest placement within file
+4. Ask for confirmation after updating
+
+For `/memory search`:
+1. Request access to relevant files
+2. Search content for query terms
+3. Summarize findings with file sources
+4. Format results clearly
+
+### Memory Organization Behavior
+
+For `/memory promote`:
+1. Request access to source file
+2. Identify content to promote
+3. Generate properly formatted content for destination file
+4. Provide both content and instructions for adding to destination
+
+For `/memory archive`:
+1. Suggest creating archive directory if needed
+2. Provide shell command to move file
+3. Suggest updating references if necessary
+
+For `/memory consolidate`:
+1. Request access to source files
+2. Generate consolidated content maintaining original structure
+3. Provide complete new content for target file
+
+### Configuration Commands Behavior
+
+For `/memory config`:
+1. Request access to config.json
+2. Generate JSON update for specified setting
+3. Provide exact text to update
+4. Explain impact of change
+
+For `/memory toggle`:
+1. Request access to config.json
+2. Identify setting to toggle
+3. Generate JSON update to enable/disable feature
+4. Explain what will change
+
+### Event Reporting Behavior
+
+For `/memory event`:
+1. Acknowledge the event
+2. Identify affected memory files based on event type
+3. Generate appropriate updates for each file
+4. Provide formatted content
+5. Ask for confirmation after updates
+
+### Command Shortcuts Behavior
+
+For command shortcuts:
+1. Interpret shortcuts identically to their full command counterparts
+2. Acknowledge using shortcut in response
+
+## Completion Response Structure
+
+After completing any command or set of actions, I will always conclude with:
+
+```
+## Action Report
+- **Completed:** [List of completed actions]
+- **Status:** [Success/Partial/Failed]
+- **Files Affected:** [List of files updated or referenced]
+
+## Available Commands
+- `/command1` - [Brief description]
+- `/command2` - [Brief description]
+[2-3 relevant commands for current context]
+
+## Suggested Next Steps
+- [Concrete suggestion 1]
+- [Concrete suggestion 2]
+- [Memory update suggestion]
+```
+
+### Mode-Specific Response Focus
+
+- **THINK Mode**: Emphasize exploration commands and documenting discoveries
+- **PLAN Mode**: Emphasize plan validation, refinement, and task breakdowns
+- **IMPLEMENT Mode**: Emphasize progress tracking and checkpointing work
+- **REVIEW Mode**: Emphasize improvement identification and documenting findings
+- **DOCUMENT Mode**: Emphasize documentation completion and consistency checks
 EOF
 
 # 003_mode_definitions.mdc
@@ -517,6 +637,280 @@ I will verify that operations align with the current mode:
 4. Request confirmation before proceeding with mode-specific operations
 
 This ensures that memory operations are consistent with the intended development phase.
+
+## Mode-Specific Command Behaviors
+
+### Mode Confirmation Behavior
+
+For `/mode <mode_name>`:
+1. Verify the mode matches UI selection
+2. Load appropriate memory files for the mode
+3. Acknowledge the mode change
+4. Explain the mode focus
+5. Request access to mode-specific memory files
+
+### THINK Mode Commands Behavior
+
+For `/think explore <topic>`:
+1. Check mode is THINK
+2. Guide systematic exploration of topic
+3. Structure findings
+4. Suggest updating session_notes.md and working_decisions.md with exploration results
+
+For `/think compare <options>`:
+1. Check mode is THINK
+2. Analyze all options with pros/cons
+3. Create comparison table
+4. Suggest preliminary decision
+5. Suggest updating working_decisions.md with comparison
+
+For `/think research <query>`:
+1. Check mode is THINK
+2. Organize research plan
+3. Suggest information sources
+4. Structure findings
+5. Suggest adding research to session_notes.md
+
+### PLAN Mode Commands Behavior
+
+For `/plan create <feature>`:
+1. Check mode is PLAN
+2. Generate step-by-step implementation plan
+3. Break into tasks
+4. Suggest updating current_context.md with plan details
+
+For `/plan validate`:
+1. Check mode is PLAN
+2. Request access to architecture.md and patterns.md
+3. Verify plan compatibility
+4. Suggest changes if needed
+
+For `/plan estimate`:
+1. Check mode is PLAN
+2. Request access to current_context.md
+3. Generate time/effort estimates for each step
+4. Suggest updating plan with estimates
+
+For `/plan approve`:
+1. Check mode is PLAN
+2. Request access to current_context.md
+3. Suggest promoting plan to decisions.md
+4. Update progress.md with planned items
+
+### IMPLEMENT Mode Commands Behavior
+
+For `/implement start <task>`:
+1. Check mode is IMPLEMENT
+2. Request access to current_context.md
+3. Update progress.md with task start
+4. Focus assistance on implementation details
+
+For `/implement checkpoint`:
+1. Check mode is IMPLEMENT
+2. Record current implementation progress
+3. Suggest updating progress.md with checkpoint details
+4. Confirm next steps
+
+For `/implement complete`:
+1. Check mode is IMPLEMENT
+2. Request confirmation of completion
+3. Suggest updating progress.md and current_context.md to reflect completion
+
+For `/implement issue <description>`:
+1. Check mode is IMPLEMENT
+2. Document issue details
+3. Suggest adding to session_notes.md and current_context.md
+4. Propose resolution approach
+
+### REVIEW Mode Commands Behavior
+
+For `/review code <file>`:
+1. Check mode is REVIEW
+2. Request access to specified file and patterns.md
+3. Analyze code against patterns
+4. List improvements
+5. Suggest updating session_notes.md with findings
+
+For `/review feature <feature>`:
+1. Check mode is REVIEW
+2. Request access to relevant files and patterns.md
+3. Perform broad feature review
+4. Check consistency
+5. Suggest updating session_notes.md with review
+
+For `/review suggest`:
+1. Check mode is REVIEW
+2. Generate prioritized improvement list based on recent reviews
+3. Suggest adding to working_decisions.md
+
+For `/review approve`:
+1. Check mode is REVIEW
+2. Suggest updating progress.md to indicate review approval
+3. Add approval details to decisions.md if needed
+
+### DOCUMENT Mode Commands Behavior
+
+For `/document update <file>`:
+1. Check mode is DOCUMENT
+2. Request access to specified documentation file
+3. Suggest updated content
+4. Provide formatted updates
+5. Confirm after changes
+
+For `/document generate <type>`:
+1. Check mode is DOCUMENT
+2. Request access to relevant code files
+3. Generate documentation based on code structure and comments
+4. Suggest file for storing documentation
+
+For `/document promote <temp_file>`:
+1. Check mode is DOCUMENT
+2. Request access to temporary file
+3. Identify content to promote
+4. Generate formatted content for permanent documentation
+5. Suggest additions to appropriate long-term files
+
+For `/document validate`:
+1. Check mode is DOCUMENT
+2. Request access to documentation files
+3. Check for inconsistencies
+4. Identify outdated information
+5. Generate list of suggested updates
+
+### Context Commands Behavior
+
+For `/context load <memory_file>`:
+1. Request user to open specified memory file
+2. Read content when provided
+3. Acknowledge loading
+4. Reference file in subsequent responses
+
+For `/context status`:
+1. List all memory files currently in context
+2. Indicate when each was last accessed
+3. Note any files that need refreshing
+
+For `/context suggest`:
+1. Based on current task and files, suggest relevant memory files to load
+2. Explain why each would be helpful
+3. Prioritize suggestions
+
+### Code Annotation Behavior
+
+When annotation is identified in code:
+1. Extract annotation content
+2. Generate properly formatted update for appropriate memory file
+3. Suggest adding content to the specific file mentioned in annotation
+4. Include file path, extracted content, and formatted entry in suggestion
+
+## Mode-Specific Response Templates
+
+Each operational mode should include standardized response templates for completing actions. These templates ensure users always receive consistent guidance tailored to the current mode.
+
+### THINK Mode Response Template
+
+After completing THINK mode actions:
+
+```
+## Exploration Report
+- **Completed:** [Exploration activities completed]
+- **Insights Generated:** [Key insights or findings]
+- **Status:** [Complete/In Progress]
+
+## Helpful Commands
+- `/think compare "<option 1> vs <option 2>"` - Compare different approaches
+- `/memory save working_decisions.md` - Save current thinking
+- `/memory update session_notes.md "New insight: [brief insight]"`
+
+## Suggested Next Steps
+- Document your decision framework in working_decisions.md
+- Explore alternative approaches to [relevant topic]
+- Report this exploration with `/memory event think "Explored [topic]"`
+```
+
+### PLAN Mode Response Template
+
+After completing PLAN mode actions:
+
+```
+## Planning Report
+- **Completed:** [Planning activities completed]
+- **Plan Components:** [Key components of the plan]
+- **Status:** [Complete/In Progress]
+
+## Helpful Commands
+- `/plan validate` - Validate plan against architecture
+- `/plan estimate` - Estimate effort for implementation
+- `/memory update current_context.md "Plan details: [brief details]"`
+
+## Suggested Next Steps
+- Break down the plan into specific implementation tasks
+- Validate the plan against existing architecture
+- Report this planning with `/memory event plan "Created plan for [feature]"`
+```
+
+### IMPLEMENT Mode Response Template
+
+After completing IMPLEMENT mode actions:
+
+```
+## Implementation Report
+- **Completed:** [Implementation activities completed]
+- **Components Affected:** [Components that were modified]
+- **Status:** [Complete/In Progress]
+
+## Helpful Commands
+- `/implement checkpoint` - Record implementation progress
+- `/implement complete` - Mark implementation as complete
+- `/memory update progress.md "Implementation status: [brief status]"`
+
+## Suggested Next Steps
+- Create a checkpoint to track your implementation progress
+- Document any patterns discovered during implementation
+- Report this implementation with `/memory event commit "Implemented [feature]"`
+```
+
+### REVIEW Mode Response Template
+
+After completing REVIEW mode actions:
+
+```
+## Review Report
+- **Completed:** [Review activities completed]
+- **Issues Identified:** [Key issues found]
+- **Status:** [Complete/In Progress]
+
+## Helpful Commands
+- `/review suggest` - Generate improvement suggestions
+- `/review approve` - Mark review as approved
+- `/memory update session_notes.md "Review findings: [brief findings]"`
+
+## Suggested Next Steps
+- Document improvement suggestions in working_decisions.md
+- Prioritize issues for future implementation
+- Report this review with `/memory event review "Reviewed [component]"`
+```
+
+### DOCUMENT Mode Response Template
+
+After completing DOCUMENT mode actions:
+
+```
+## Documentation Report
+- **Completed:** [Documentation activities completed]
+- **Files Updated:** [Documentation files updated]
+- **Status:** [Complete/In Progress]
+
+## Helpful Commands
+- `/document validate` - Check documentation consistency
+- `/document promote <temp_file>` - Promote temporary documentation
+- `/memory update long_term/[file] "Documentation update: [brief update]"`
+
+## Suggested Next Steps
+- Ensure consistency across all documentation
+- Promote any temporary decisions to permanent records
+- Report this documentation with `/memory event document "Updated docs for [component]"`
+```
 EOF
 
 # 004_auto_context.mdc
@@ -746,6 +1140,9 @@ When an event is reported, I will follow this protocol:
 4. **Confirm implementation**: Ask for confirmation when updates are completed
    - "Have you updated the memory files? Let me know when it's done."
 
+5. **Action Summary and Next Steps**: Provide a structured completion report with options
+   - Include completion summary, relevant command options, and suggested next steps
+
 ## Event-Memory Mappings
 
 Different events should trigger updates to specific memory files:
@@ -879,6 +1276,27 @@ SUGGESTED CONTENT:
 Would you like me to provide this update? (You can copy it to the file)
 ```
 
+## Event Completion Response
+
+After processing any event, I will always conclude with:
+
+```
+## Event Processing Report
+- **Event Type:** [Type of event processed]
+- **Updates Suggested:** [Files suggested for update]
+- **Status:** [Processed/Pending Implementation]
+
+## Related Commands
+- `/memory event <type> <details>` - Report another event
+- `/memory update <file> <content>` - Make additional updates
+- [1-2 contextually relevant commands]
+
+## Recommended Actions
+- [Specific follow-up action based on event type]
+- [Memory update suggestion if applicable]
+- [Mode-specific recommendation]
+```
+
 ## Integration with Modes
 
 Different operational modes influence how I respond to events:
@@ -887,7 +1305,7 @@ Different operational modes influence how I respond to events:
 - **PLAN Mode**: Focus on task breakdown and implementation plans
 - **IMPLEMENT Mode**: Prioritize progress updates and implementation details 
 - **REVIEW Mode**: Highlight improvement suggestions and issue tracking
-- **DOCUMENT Mode**: Balance updates across all long-term memory files
+- **DOCUMENT Mode**: Balance updates across all memory files
 
 I'll adjust my event response based on the current operational mode.
 EOF

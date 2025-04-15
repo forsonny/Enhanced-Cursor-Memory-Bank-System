@@ -29,14 +29,24 @@ Command groups include:
 | `/memory status` | None | Display current memory system status | `/memory status` |
 | `/memory help` | None | Show available memory commands and usage | `/memory help` |
 
+**AI Behavior - Core Memory Commands:**
+- `/memory status`: Display initialization status, current mode, available memory files, and recent activities. Request access to config.json if needed. Format response using STATUS format. 
+- `/memory help`: List available commands with brief descriptions and usage examples. No file access needed.
+
 ### Memory Management Commands
 
 | Command | Arguments | Options | Description | Example |
 |---------|-----------|---------|-------------|---------|
 | `/memory save` | `<context>` | `-t` (temporary)<br>`-m <message>` (message) | Suggest saving information to specified memory context | `/memory save architecture`<br>`/memory save patterns -t`<br>`/memory save decisions -m "Auth decision"` |
 | `/memory recall` | `<context>` | `-v` (verbose) | Request to see information from specified memory context | `/memory recall patterns`<br>`/memory recall architecture -v` |
-| `/memory update` | `<file> <content>` | None | Suggest updating specific memory file | `/memory update decisions.md "Decision: We will use TypeScript"` |
+| `/memory update` | `<file> <content>` | None | Suggest updates to specific memory file | `/memory update decisions.md "Decision: We will use TypeScript"` |
 | `/memory search` | `<query>` | `-c <context>` (context) | Search across memory for relevant information | `/memory search authentication`<br>`/memory search -c architecture database` |
+
+**AI Behavior - Memory Management Commands:**
+- `/memory save`: Request user to identify information to save. Generate formatted content appropriate for target file. Provide full content to add. Ask for confirmation after updating.
+- `/memory recall`: Request user to open specified file. Read content when provided. Acknowledge receiving content and reference key points in subsequent responses.
+- `/memory update`: Generate properly formatted content for specified file. Provide complete update text. Suggest placement within file. Ask for confirmation after updating.
+- `/memory search`: Request access to relevant files. Search content for query terms. Summarize findings with file sources. Format results clearly.
 
 ### Memory Organization Commands
 
@@ -46,11 +56,19 @@ Command groups include:
 | `/memory archive` | `<file>` | None | Suggest archiving memory that's no longer actively relevant | `/memory archive old_patterns.md` |
 | `/memory consolidate` | `<files> <target>` | None | Suggest combining related memories into a cohesive document | `/memory consolidate auth_*.md authentication.md` |
 
+**AI Behavior - Memory Organization Commands:**
+- `/memory promote`: Request access to source file. Identify content to promote. Generate properly formatted content for destination file. Provide both content and instructions for adding to destination.
+- `/memory archive`: Suggest creating archive directory if needed. Provide shell command to move file. Suggest updating references if necessary.
+- `/memory consolidate`: Request access to source files. Generate consolidated content maintaining original structure. Provide complete new content for target file.
+
 ### Event Reporting Commands
 
 | Command | Arguments | Description | Example |
 |---------|-----------|-------------|---------|
 | `/memory event` | `<type> <details>` | Report a development event | `/memory event commit "Implemented auth"`<br>`/memory event build_success "All tests passing"` |
+
+**AI Behavior - Event Reporting Commands:**
+- `/memory event`: Acknowledge the event. Identify affected memory files based on event type. Generate appropriate updates for each file. Provide formatted content. Ask for confirmation after updates.
 
 ### Configuration Commands
 
@@ -58,6 +76,10 @@ Command groups include:
 |---------|-----------|-------------|---------|
 | `/memory config` | `<key> <value>` | Suggest updates to memory system configuration | `/memory config short_term.retention 7d`<br>`/memory config auto_context.max_files 10` |
 | `/memory toggle` | `<feature>` | Suggest enabling/disabling specific memory features | `/memory toggle auto_recall`<br>`/memory toggle events.fileCreation` |
+
+**AI Behavior - Configuration Commands:**
+- `/memory config`: Request access to config.json. Generate JSON update for specified setting. Provide exact text to update. Explain impact of change.
+- `/memory toggle`: Request access to config.json. Identify setting to toggle. Generate JSON update to enable/disable feature. Explain what will change.
 
 ### Command Shortcuts
 
@@ -67,6 +89,10 @@ Command groups include:
 | `/mr` | `/memory recall` | Request memory context | `/mr patterns` |
 | `/mu` | `/memory update` | Suggest memory file update | `/mu decisions.md "New decision"` |
 
+**AI Behavior - Shortcuts:**
+- Interpret shortcuts identically to their full command counterparts.
+- Acknowledge using shortcut in response.
+
 ## Mode Commands
 
 ### Mode Confirmation
@@ -75,6 +101,9 @@ Command groups include:
 |---------|-----------|-------------|---------|
 | `/mode` | `<mode_name>` | Confirm current operational mode (after UI selection) | `/mode think`<br>`/mode plan`<br>`/mode implement`<br>`/mode review`<br>`/mode document` |
 
+**AI Behavior - Mode Confirmation:**
+- `/mode`: Verify mode matches UI selection. Load appropriate memory files for mode. Acknowledge mode change. Explain mode focus. Request access to mode-specific memory files.
+
 ### THINK Mode Commands
 
 | Command | Arguments | Description | Example |
@@ -82,6 +111,11 @@ Command groups include:
 | `/think explore` | `<topic>` | Start guided exploration of a topic | `/think explore authentication` |
 | `/think compare` | `<options>` | Analyze trade-offs between approaches | `/think compare "JWT vs session auth"` |
 | `/think research` | `<query>` | Research and document findings on a topic | `/think research "modern auth best practices"` |
+
+**AI Behavior - THINK Mode Commands:**
+- `/think explore`: Check mode is THINK. Guide systematic exploration of topic. Structure findings. Suggest updating session_notes.md and working_decisions.md with exploration results.
+- `/think compare`: Check mode is THINK. Analyze all options with pros/cons. Create comparison table. Suggest preliminary decision. Suggest updating working_decisions.md with comparison.
+- `/think research`: Check mode is THINK. Organize research plan. Suggest information sources. Structure findings. Suggest adding research to session_notes.md.
 
 ### PLAN Mode Commands
 
@@ -92,6 +126,12 @@ Command groups include:
 | `/plan estimate` | None | Estimate effort for current plan | `/plan estimate` |
 | `/plan approve` | None | Mark plan as approved and ready for implementation | `/plan approve` |
 
+**AI Behavior - PLAN Mode Commands:**
+- `/plan create`: Check mode is PLAN. Generate step-by-step implementation plan. Break into tasks. Suggest updating current_context.md with plan details.
+- `/plan validate`: Check mode is PLAN. Request access to architecture.md and patterns.md. Verify plan compatibility. Suggest changes if needed.
+- `/plan estimate`: Check mode is PLAN. Request access to current_context.md. Generate time/effort estimates for each step. Suggest updating plan with estimates.
+- `/plan approve`: Check mode is PLAN. Request access to current_context.md. Suggest promoting plan to decisions.md. Update progress.md with planned items.
+
 ### IMPLEMENT Mode Commands
 
 | Command | Arguments | Description | Example |
@@ -100,6 +140,12 @@ Command groups include:
 | `/implement checkpoint` | None | Record progress checkpoint | `/implement checkpoint` |
 | `/implement complete` | None | Mark current task as complete | `/implement complete` |
 | `/implement issue` | `<description>` | Record implementation issue | `/implement issue "Edge case in login flow"` |
+
+**AI Behavior - IMPLEMENT Mode Commands:**
+- `/implement start`: Check mode is IMPLEMENT. Request access to current_context.md. Update progress.md with task start. Focus assistance on implementation details.
+- `/implement checkpoint`: Check mode is IMPLEMENT. Record current implementation progress. Suggest updating progress.md with checkpoint details. Confirm next steps.
+- `/implement complete`: Check mode is IMPLEMENT. Request confirmation of completion. Suggest updating progress.md and current_context.md to reflect completion.
+- `/implement issue`: Check mode is IMPLEMENT. Document issue details. Suggest adding to session_notes.md and current_context.md. Propose resolution approach.
 
 ### REVIEW Mode Commands
 
@@ -110,6 +156,12 @@ Command groups include:
 | `/review suggest` | None | Generate improvement suggestions | `/review suggest` |
 | `/review approve` | None | Mark current implementation as reviewed and approved | `/review approve` |
 
+**AI Behavior - REVIEW Mode Commands:**
+- `/review code`: Check mode is REVIEW. Request access to specified file and patterns.md. Analyze code against patterns. List improvements. Suggest updating session_notes.md with findings.
+- `/review feature`: Check mode is REVIEW. Request access to relevant files and patterns.md. Perform broad feature review. Check consistency. Suggest updating session_notes.md with review.
+- `/review suggest`: Check mode is REVIEW. Generate prioritized improvement list based on recent reviews. Suggest adding to working_decisions.md.
+- `/review approve`: Check mode is REVIEW. Suggest updating progress.md to indicate review approval. Add approval details to decisions.md if needed.
+
 ### DOCUMENT Mode Commands
 
 | Command | Arguments | Description | Example |
@@ -119,6 +171,12 @@ Command groups include:
 | `/document promote` | `<temp_file>` | Promote temporary documentation to permanent | `/document promote session_notes.md` |
 | `/document validate` | None | Check documentation for consistency | `/document validate` |
 
+**AI Behavior - DOCUMENT Mode Commands:**
+- `/document update`: Check mode is DOCUMENT. Request access to specified documentation file. Suggest updated content. Provide formatted updates. Confirm after changes.
+- `/document generate`: Check mode is DOCUMENT. Request access to relevant code files. Generate documentation based on code structure and comments. Suggest file for storing documentation.
+- `/document promote`: Check mode is DOCUMENT. Request access to temporary file. Identify content to promote. Generate formatted content for permanent documentation. Suggest additions to appropriate long-term files.
+- `/document validate`: Check mode is DOCUMENT. Request access to documentation files. Check for inconsistencies. Identify outdated information. Generate list of suggested updates.
+
 ## Context Commands
 
 | Command | Arguments | Description | Example |
@@ -127,37 +185,10 @@ Command groups include:
 | `/context status` | None | Report which memory files the AI has seen | `/context status` |
 | `/context suggest` | None | Get suggestions for helpful memory files | `/context suggest` |
 
-## How Commands Work
-
-In the Enhanced Memory Bank System, commands follow this execution flow:
-
-1. **You type a command** in Cursor's chat interface
-2. **The AI interprets the command** based on its rule files
-3. **The AI requests necessary information** if it needs to see specific files
-4. **The AI suggests appropriate actions** based on the command
-5. **You implement the suggested actions** to maintain the memory system
-
-Since the AI cannot directly modify files, most commands result in suggestions that you need to implement manually.
-
-## Command Help System
-
-All commands provide contextual help with the `-h` flag:
-
-```
-/memory save -h
-
-COMMAND: /memory save <context>
-DESCRIPTION: Saves current information to specified memory context
-ARGUMENTS:
-  <context> - Target memory context (required)
-OPTIONS:
-  -t - Store as temporary (short-term) memory
-  -m <message> - Add descriptive message
-EXAMPLES:
-  /memory save architecture
-  /memory save patterns -t
-  /memory save decisions -m "Updated authentication approach"
-```
+**AI Behavior - Context Commands:**
+- `/context load`: Request user to open specified memory file. Read content when provided. Acknowledge loading. Reference file in subsequent responses.
+- `/context status`: List all memory files currently in context. Indicate when each was last accessed. Note any files that need refreshing.
+- `/context suggest`: Based on current task and files, suggest relevant memory files to load. Explain why each would be helpful. Prioritize suggestions.
 
 ## Command Response Format
 
@@ -169,6 +200,25 @@ STATUS: <success|planning|failure>
 DETAILS: <relevant details about operation>
 ACTION NEEDED: <what you need to do>
 NEXT STEPS: <suggested follow-up actions>
+```
+
+Additionally, after completing any command or action, the AI will provide:
+
+```
+## Action Report
+- **Completed:** [List of completed actions]
+- **Status:** [Success/Partial/Failed]
+- **Files Affected:** [List of files updated or referenced]
+
+## Available Commands
+- `/command1` - [Brief description]
+- `/command2` - [Brief description]
+[2-3 relevant commands for current context]
+
+## Suggested Next Steps
+- [Concrete suggestion 1]
+- [Concrete suggestion 2]
+- [Memory update suggestion]
 ```
 
 ## Event Types for /memory event
@@ -213,106 +263,104 @@ While not commands in the traditional sense, these code annotations trigger memo
 | `@memory:todo` | Add to current_context.md | `// @memory:todo Refactor this component to use the new pattern` |
 | `@memory:progress` | Update progress.md | `// @memory:progress Completed user authentication flow` |
 
-## Examples
+**AI Behavior - Code Annotations:**
+- When annotation is identified in code, extract content.
+- Generate properly formatted update for appropriate memory file.
+- Suggest adding content to the specific file mentioned in annotation.
+- Include file path, extracted content, and formatted entry in suggestion.
 
-### Basic Workflow Examples
+## Mode-Specific Response Templates
 
-Setting up a new project:
+Each operational mode has a standardized response format for when actions are completed:
+
+### THINK Mode Response Template
 ```
-# Check memory system status
-/memory status
+## Exploration Report
+- **Completed:** [Exploration activities completed]
+- **Insights Generated:** [Key insights or findings]
+- **Status:** [Complete/In Progress]
 
-# Request to see project brief
-/memory recall project_brief
+## Helpful Commands
+- `/think compare "<option 1> vs <option 2>"` - Compare different approaches
+- `/memory save working_decisions.md` - Save current thinking
+- `/memory update session_notes.md "New insight: [brief insight]"`
 
-# Suggest updates to project brief
-/memory update long_term/project_brief.md "Project description..."
-```
-
-Starting a new feature in THINK mode:
-```
-# First, select THINK in UI dropdown
-/mode think
-
-# Explore authentication approaches
-/think explore "user authentication"
-
-# Save working decisions
-/memory save working_decisions.md
-```
-
-Moving to planning:
-```
-# First, select PLAN in UI dropdown
-/mode plan
-
-# Create implementation plan
-/plan create "user authentication"
-
-# Update current context
-/memory update current_context.md "Planning user authentication..."
-
-# Mark plan as approved
-/plan approve
+## Suggested Next Steps
+- Document your decision framework in working_decisions.md
+- Explore alternative approaches to [relevant topic]
+- Report this exploration with `/memory event think "Explored [topic]"`
 ```
 
-Starting implementation:
+### PLAN Mode Response Template
 ```
-# First, select IMPLEMENT in UI dropdown
-/mode implement
+## Planning Report
+- **Completed:** [Planning activities completed]
+- **Plan Components:** [Key components of the plan]
+- **Status:** [Complete/In Progress]
 
-# Start implementation
-/implement start "user authentication"
+## Helpful Commands
+- `/plan validate` - Validate plan against architecture
+- `/plan estimate` - Estimate effort for implementation
+- `/memory update current_context.md "Plan details: [brief details]"`
 
-# Report a code commit event
-/memory event commit "Implemented basic auth flow"
-
-# Record checkpoint
-/implement checkpoint
-```
-
-Reviewing implementation:
-```
-# First, select REVIEW in UI dropdown
-/mode review
-
-# Review code file
-/review code "src/auth/login.ts"
-
-# Generate suggestions
-/review suggest
-
-# Mark as approved
-/review approve
+## Suggested Next Steps
+- Break down the plan into specific implementation tasks
+- Validate the plan against existing architecture
+- Report this planning with `/memory event plan "Created plan for [feature]"`
 ```
 
-Documenting completed work:
+### IMPLEMENT Mode Response Template
 ```
-# First, select DOCUMENT in UI dropdown
-/mode document
+## Implementation Report
+- **Completed:** [Implementation activities completed]
+- **Components Affected:** [Components that were modified]
+- **Status:** [Complete/In Progress]
 
-# Update documentation
-/document update api-docs
+## Helpful Commands
+- `/implement checkpoint` - Record implementation progress
+- `/implement complete` - Mark implementation as complete
+- `/memory update progress.md "Implementation status: [brief status]"`
 
-# Promote temporary documentation
-/document promote session_notes.md
-```
-
-### Advanced Examples
-
-Complex search:
-```
-/memory search -c architecture,patterns "authentication flow"
-```
-
-Reporting a build event:
-```
-/memory event build_success "Authentication system passing all tests"
+## Suggested Next Steps
+- Create a checkpoint to track your implementation progress
+- Document any patterns discovered during implementation
+- Report this implementation with `/memory event commit "Implemented [feature]"`
 ```
 
-Promoting short-term memory to long-term:
+### REVIEW Mode Response Template
 ```
-/memory promote working_decisions.md -d decisions.md
+## Review Report
+- **Completed:** [Review activities completed]
+- **Issues Identified:** [Key issues found]
+- **Status:** [Complete/In Progress]
+
+## Helpful Commands
+- `/review suggest` - Generate improvement suggestions
+- `/review approve` - Mark review as approved
+- `/memory update session_notes.md "Review findings: [brief findings]"`
+
+## Suggested Next Steps
+- Document improvement suggestions in working_decisions.md
+- Prioritize issues for future implementation
+- Report this review with `/memory event review "Reviewed [component]"`
+```
+
+### DOCUMENT Mode Response Template
+```
+## Documentation Report
+- **Completed:** [Documentation activities completed]
+- **Files Updated:** [Documentation files updated]
+- **Status:** [Complete/In Progress]
+
+## Helpful Commands
+- `/document validate` - Check documentation consistency
+- `/document promote <temp_file>` - Promote temporary documentation
+- `/memory update long_term/[file] "Documentation update: [brief update]"`
+
+## Suggested Next Steps
+- Ensure consistency across all documentation
+- Promote any temporary decisions to permanent records
+- Report this documentation with `/memory event document "Updated docs for [component]"`
 ```
 
 ## Best Practices for Using Commands
