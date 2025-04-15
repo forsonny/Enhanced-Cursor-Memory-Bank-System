@@ -42,6 +42,17 @@ chmod +x init-memory-bank.sh
 ./init-memory-bank.sh
 ```
 
+### Setting Up Custom Instructions
+
+1. Open Cursor IDE
+2. Click on Settings (gear icon in the top right)
+3. Navigate to **Rules** → **User Rules**
+4. Copy the contents of the `custom-instructions.md` file
+5. Paste into the Custom Instructions field in Cursor settings
+
+This step is crucial as it sets up the AI to properly interact with the memory system!
+
+
 ### Basic Usage
 
 1. **Initialize the system**:
