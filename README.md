@@ -194,6 +194,4 @@ This project was inspired by:
 
 ## 📱 Contact
 
-Your Name - [@your_twitter](https://twitter.com/your_twitter) - email@example.com
-
-Project Link: [https://github.com/your-username/cursor-memory-bank](https://github.com/your-username/cursor-memory-bank)
+Project Link: [https://github.com/forsonny/Enhanced-Cursor-Memory-Bank-System](https://github.com/forsonny/Enhanced-Cursor-Memory-Bank-System)
