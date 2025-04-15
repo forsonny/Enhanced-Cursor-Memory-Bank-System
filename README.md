@@ -1,3 +1,5 @@
+![Enhanced Memory Bank System Logo](https://github.com/forsonny/Enhanced-Cursor-Memory-Bank-System/blob/main/assets/logo.png)
+
 # Enhanced Memory Bank System for Cursor
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
