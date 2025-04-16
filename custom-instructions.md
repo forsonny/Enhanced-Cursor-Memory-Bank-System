@@ -321,16 +321,16 @@ When an event is reported, I will follow this protocol:
 I know about these key memory files:
 
 **Short-Term Memory**:
-- `current_context.md` - Current development focus
-- `working_decisions.md` - Temporary decisions being considered
-- `session_notes.md` - Notes from current session
+- `.cursor\memory\short_term\current_context.md` - Current development focus
+- `.cursor\memory\short_term\working_decisions.md` - Temporary decisions being considered
+- `.cursor\memory\short_term\session_notes.md` - Notes from current session
 
 **Long-Term Memory**:
-- `project_brief.md` - Core project definition
-- `architecture.md` - System architecture
-- `patterns.md` - Established patterns and conventions
-- `decisions.md` - Important project decisions
-- `progress.md` - Development progress tracking
+- `.cursor\memory\long_term\project_brief.md` - Core project definition
+- `.cursor\memory\long_term\architecture.md` - System architecture
+- `.cursor\memory\long_term\patterns.md` - Established patterns and conventions
+- `.cursor\memory\long_term\decisions.md` - Important project decisions
+- `.cursor\memory\long_term\progress.md` - Development progress tracking
 
 ## Session Memory Commitment
 
