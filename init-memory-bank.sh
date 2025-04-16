@@ -249,6 +249,17 @@ Due to Cursor's environment, memory commands follow this execution protocol:
 7. **Action Summary and Next Steps**: Provide a structured completion report with options
    - Include completion summary, command options, and suggested next steps
 
+## Path Validation Protocol
+
+Before suggesting any file operations, I will:
+
+1. **Validate Memory Paths**: Ensure target files are only within `.cursor/memory/short_term/` or `.cursor/memory/long_term/`
+2. **Normalize File Paths**: Convert any path to the correct structure
+3. **Reject Invalid Paths**: Warn if a command refers to files outside the designated memory folders
+4. **Suggest Correction**: If an invalid path is detected, suggest the correct location
+
+This ensures all memory remains properly organized and prevents file duplication outside the memory structure.
+
 ## Command Response Format
 
 When a memory command is executed, the response follows this format:
@@ -332,46 +343,64 @@ For `/memory help`:
 ### Memory Management Behavior
 
 For `/memory save`:
-1. Request user to identify information to save
-2. Generate formatted content appropriate for the target file
-3. Provide complete content to add
-4. Ask for confirmation after updating
+1. Validate that the context corresponds to a file within the memory structure
+2. If the context is ambiguous, determine the appropriate file
+3. Ensure the file path includes the correct directory prefix
+   - If `-t` flag is used, ensure the file is in `.cursor/memory/short_term/`
+   - If no flag is used, ensure the file is in `.cursor/memory/long_term/`
+4. Request user to identify information to save
+5. Generate formatted content appropriate for the target file
+6. Provide complete content to add
+7. Ask for confirmation after updating
 
 For `/memory recall`:
-1. Request user to open the specified file
-2. Read content when provided
-3. Acknowledge receiving content
-4. Reference key points in subsequent responses
+1. Validate that the context corresponds to a file within the memory structure
+2. Normalize the path to include the correct directory prefix
+3. Request user to open the specified file
+4. Read content when provided
+5. Acknowledge receiving content
+6. Reference key points in subsequent responses
 
 For `/memory update`:
-1. Generate properly formatted content for the specified file
-2. Provide complete update text
-3. Suggest placement within file
-4. Ask for confirmation after updating
+1. Validate that the file path is within `.cursor/memory/short_term/` or `.cursor/memory/long_term/`
+2. If the path doesn't include the proper directory, normalize it to the appropriate location
+   - For known short-term files: prepend `.cursor/memory/short_term/`
+   - For known long-term files: prepend `.cursor/memory/long_term/`
+   - For ambiguous files: ask for clarification
+3. Generate properly formatted content for the normalized file path
+4. Provide complete update text
+5. Suggest placement within file
+6. Ask for confirmation after updating
 
 For `/memory search`:
 1. Request access to relevant files
-2. Search content for query terms
-3. Summarize findings with file sources
-4. Format results clearly
+2. Ensure all files being searched are within the memory structure
+3. Search content for query terms
+4. Summarize findings with file sources
+5. Format results clearly
 
 ### Memory Organization Behavior
 
 For `/memory promote`:
-1. Request access to source file
-2. Identify content to promote
-3. Generate properly formatted content for destination file
-4. Provide both content and instructions for adding to destination
+1. Validate the source file exists in `.cursor/memory/short_term/`
+2. Ensure the destination is in `.cursor/memory/long_term/`
+3. Request access to source file
+4. Identify content to promote
+5. Generate properly formatted content for destination file
+6. Provide both content and instructions for adding to destination
 
 For `/memory archive`:
-1. Suggest creating archive directory if needed
-2. Provide shell command to move file
-3. Suggest updating references if necessary
+1. Validate the file exists in the memory structure
+2. Suggest creating archive directory if needed
+3. Provide shell command to move file
+4. Suggest updating references if necessary
 
 For `/memory consolidate`:
-1. Request access to source files
-2. Generate consolidated content maintaining original structure
-3. Provide complete new content for target file
+1. Validate all source files are within the memory structure
+2. Validate the target file is within the memory structure
+3. Request access to source files
+4. Generate consolidated content maintaining original structure
+5. Provide complete new content for target file
 
 ### Configuration Commands Behavior
 
@@ -393,14 +422,44 @@ For `/memory event`:
 1. Acknowledge the event
 2. Identify affected memory files based on event type
 3. Generate appropriate updates for each file
-4. Provide formatted content
-5. Ask for confirmation after updates
+4. Ensure all suggested file paths are within the memory structure
+5. Provide formatted content
+6. Ask for confirmation after updates
 
 ### Command Shortcuts Behavior
 
 For command shortcuts:
 1. Interpret shortcuts identically to their full command counterparts
-2. Acknowledge using shortcut in response
+2. Apply the same path validation protocols
+3. Acknowledge using shortcut in response
+
+## File Path Normalization
+
+When processing file paths for memory operations:
+
+1. If the path already starts with `.cursor/memory/short_term/` or `.cursor/memory/long_term/`, use it as is
+2. If the path is just a filename (e.g., "decisions.md"):
+   - For known short-term files (current_context.md, working_decisions.md, session_notes.md): prepend `.cursor/memory/short_term/`
+   - For known long-term files (project_brief.md, architecture.md, patterns.md, decisions.md, progress.md): prepend `.cursor/memory/long_term/`
+   - If ambiguous: ask for clarification with "Did you mean the short-term or long-term version of this file?"
+3. If the path seems to be outside the memory structure:
+   - Warn: "I've detected a file path outside the memory structure."
+   - Suggest: "Memory files should be stored in `.cursor/memory/short_term/` or `.cursor/memory/long_term/`."
+   - Provide corrected path: "I'll assume you meant `.cursor/memory/[appropriate_directory]/[filename]`."
+
+## Known Memory Files
+
+### Short-Term Memory Files:
+- current_context.md
+- working_decisions.md
+- session_notes.md
+
+### Long-Term Memory Files:
+- project_brief.md
+- architecture.md
+- patterns.md
+- decisions.md
+- progress.md
 
 ## Completion Response Structure
 
