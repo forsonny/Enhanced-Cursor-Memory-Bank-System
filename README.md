@@ -53,6 +53,21 @@ chmod +x init-memory-bank.sh
 This step is crucial as it sets up the AI to properly interact with the memory system!
 
 
+### Configuring Rule Types
+
+When adding the memory bank rules in Cursor, configure each rule with the correct type:
+
+| Rule File | Rule Type | Glob Pattern |
+|:----------|:----------:|:-------------:|
+| **001_memory_core.mdc** | Always | N/A |
+| **002_memory_commands.mdc** | Always | N/A |
+| **003_mode_definitions.mdc** | Always | N/A |
+| **004_auto_context.mdc** | Auto Attached | `**/*.*` |
+| **005_memory_events.mdc** | Always | N/A |
+
+> **⚠️ Important**: Setting the correct rule types ensures the memory system works properly across all files and contexts in your project.
+
+
 ### Basic Usage
 
 1. **Initialize the system**:
